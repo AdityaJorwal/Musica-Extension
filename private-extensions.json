@@ -2,9 +2,9 @@
   {
     "id": "jiosaavn",
     "name": "JioSaavn",
-    "description": "Search 100M+ regional and international tracks with high-quality 320kbps streams.",
-    "version": "0.29.43",
-    "classification": "METADATA",
+    "description": "Search 100M+ regional and international tracks with direct 320kbps stream links.",
+    "version": "0.30.0",
+    "classification": "STREAMER",
     "script": "jiosaavn.js",
     "isActive": true
   },
