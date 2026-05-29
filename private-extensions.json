@@ -1,0 +1,18 @@
+[
+  {
+    "id": "spotify",
+    "name": "Spotify Catalog",
+    "version": "1.0.0",
+    "classification": "METADATA",
+    "script": "spotify.js",
+    "dependencies": ["youtube"]
+  },
+  {
+    "id": "youtube",
+    "name": "YouTube Streams",
+    "version": "1.0.0",
+    "classification": "STREAMER",
+    "script": "youtube.js",
+    "dependencies": []
+  }
+]
