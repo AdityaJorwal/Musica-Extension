@@ -1,41 +1,60 @@
 globalThis.spotify = {
   search: async function(query) {
     try {
-      // Fetches live unauthenticated iTunes Music search catalog to populate Spotify metadata
-      let url = 'https://itunes.apple.com/search?term=' + encodeURIComponent(query) + '&limit=15&media=music';
-      let response = await fetch(url);
-      let data = await response.json();
+      // iTunes Search API - no auth required, works globally
+      let url = 'https://itunes.apple.com/search?term=' + encodeURIComponent(query) + '&limit=20&media=music&entity=song';
       
+      let response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Musica/1.0'
+        }
+      });
+
+      let data = await response.json();
       let tracks = [];
-      if (data && data.results) {
+
+      if (data && data.results && data.results.length > 0) {
         for (let i = 0; i < data.results.length; i++) {
           let track = data.results[i];
+          if (!track.trackName) continue;
+          
+          // Get higher resolution artwork (replace 100x100 with 300x300)
+          let artUrl = (track.artworkUrl100 || '').replace('100x100', '300x300');
+          
           tracks.push({
-            id: 'spotify_track_' + track.trackId,
+            id: 'itunes_' + (track.trackId || i),
             title: track.trackName || 'Unknown Title',
             artist: track.artistName || 'Unknown Artist',
-            albumArt: track.artworkUrl100 || '',
-            durationMs: track.trackTimeMillis || 180000
+            album: track.collectionName || '',
+            albumArt: artUrl,
+            durationMs: track.trackTimeMillis || 180000,
+            previewUrl: track.previewUrl || ''
           });
         }
+        return JSON.stringify(tracks);
       }
-      return JSON.stringify(tracks);
+
+      // Empty result set but successful response
+      return JSON.stringify([]);
+
     } catch (e) {
-      // Offline fallback mock data
+      // Offline fallback mock data with plausible results
       let fallback = [
         {
-          id: 'spotify_track_mock1',
-          title: query + ' (Acoustic Mock)',
-          artist: 'Dynamic Scraper Artists',
-          albumArt: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=200',
+          id: 'mock_' + query.replace(/\s+/g, '_') + '_1',
+          title: query,
+          artist: 'Search Result (Offline)',
+          albumArt: '',
           durationMs: 210000
         },
         {
-          id: 'spotify_track_mock2',
-          title: query + ' (Electronic Cover)',
-          artist: 'Synthesizer Plugins',
-          albumArt: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200',
-          durationMs: 195000
+          id: 'mock_' + query.replace(/\s+/g, '_') + '_2',
+          title: query + ' (Live Version)',
+          artist: 'Search Result (Offline)',
+          albumArt: '',
+          durationMs: 245000
         }
       ];
       return JSON.stringify(fallback);
