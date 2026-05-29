@@ -86,6 +86,33 @@ globalThis.jiosaavn = {
     }
   },
 
+  getResolveUrl: function(title, artist, duration) {
+    var query = (title || '') + ' ' + (artist || '');
+    return 'https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&api_version=4&ctx=web6dot0&q=' +
+      encodeURIComponent(query.trim());
+  },
+
+  processResolveResponse: function(body) {
+    try {
+      var data = JSON.parse(body);
+      if (data && data.results && data.results.length > 0) {
+        var song = data.results[0];
+        if (song.more_info && song.more_info.encrypted_media_url) {
+          var ciphertext = song.more_info.encrypted_media_url;
+          var decrypted = CryptoJS.DES.decrypt(
+            { ciphertext: CryptoJS.enc.Base64.parse(ciphertext) },
+            CryptoJS.enc.Utf8.parse('38346591'),
+            { mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7 }
+          ).toString(CryptoJS.enc.Utf8);
+          if (decrypted && decrypted.startsWith('http')) {
+            return decrypted.replace('_96_p.mp4', '_320.mp4').replace('_96.mp4', '_320.mp4');
+          }
+        }
+      }
+    } catch (e) {}
+    return '';
+  },
+
   getFallbackResults: function(query) {
     return '[]';
   }

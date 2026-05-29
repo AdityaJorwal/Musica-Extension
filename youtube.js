@@ -7,33 +7,73 @@
  * Fallback: returns deterministic SoundHelix mock streams.
  */
 globalThis.youtube = {
+
+  /**
+   * 1. THE SEARCH LAYER: Allows searching YouTube directly.
+   */
+  getSearchUrl: function(query) {
+    return 'https://vid.puffyan.us/api/v1/search?q=' + encodeURIComponent(query) + '&type=video';
+  },
+
+  /**
+   * 2. THE PARSER LAYER: Transforms YouTube search results into track objects.
+   */
+  processSearchResponse: function(body) {
+    try {
+      var data = JSON.parse(body);
+      var tracks = [];
+
+      for (var i = 0; i < data.length; i++) {
+        var video = data[i];
+        if (!video.title) continue;
+
+        var albumArt = '';
+        if (video.videoThumbnails && video.videoThumbnails.length > 0) {
+          albumArt = video.videoThumbnails[0].url;
+        }
+
+        tracks.push({
+          id: 'youtube_' + video.videoId,
+          title: video.title,
+          artist: video.author || 'Unknown Channel',
+          album: 'YouTube Video',
+          albumArt: albumArt,
+          durationMs: (video.lengthSeconds || 180) * 1000,
+          streamUrl: 'https://vid.puffyan.us/latest_version?id=' + video.videoId + '&itag=140', 
+          source_extension: 'youtube'
+        });
+      }
+      return JSON.stringify(tracks);
+    } catch (e) {
+      return '[]';
+    }
+  },
+
+  /**
+   * 3. THE RESOLVER LAYER (URL Protocol): Used when another metadata-only extension 
+   * (like Spotify) needs to fetch audio for a song.
+   */
   getResolveUrl: function(title, artist, duration) {
     var query = (title || '') + ' ' + (artist || '');
-    return 'https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&api_version=4&ctx=web6dot0&q=' +
-      encodeURIComponent(query.trim());
+    return 'https://vid.puffyan.us/api/v1/search?q=' + encodeURIComponent(query) + '&type=video';
   },
 
   processResolveResponse: function(body) {
     try {
       var data = JSON.parse(body);
-      if (data && data.results && data.results.length > 0) {
-        var song = data.results[0];
-        if (song.more_info && song.more_info.encrypted_media_url) {
-          var ciphertext = song.more_info.encrypted_media_url;
-          var decrypted = CryptoJS.DES.decrypt(
-            { ciphertext: CryptoJS.enc.Base64.parse(ciphertext) },
-            CryptoJS.enc.Utf8.parse('38346591'),
-            { mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7 }
-          ).toString(CryptoJS.enc.Utf8);
-          if (decrypted && decrypted.startsWith('http')) {
-            return decrypted.replace('_96_p.mp4', '_320.mp4').replace('_96.mp4', '_320.mp4');
-          }
+      if (data && data.length > 0) {
+        var video = data[0];
+        if (video.videoId) {
+          return 'https://vid.puffyan.us/latest_version?id=' + video.videoId + '&itag=140';
         }
       }
     } catch (e) {}
     return '';
   },
 
+  /**
+   * 4. THE FALLBACK LAYER: Synchronous static fallback.
+   */
   resolveStream: function(title, artist, duration) {
     return 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
   }
