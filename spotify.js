@@ -1,63 +1,77 @@
+/**
+ * Musica Extension – Spotify/iTunes Catalog Search
+ * Protocol v2: synchronous URL builder + response processor
+ * HTTP is handled by Dart core; JS only builds URLs and parses responses.
+ */
 globalThis.spotify = {
-  search: async function(query) {
-    try {
-      // iTunes Search API - no auth required, works globally
-      let url = 'https://itunes.apple.com/search?term=' + encodeURIComponent(query) + '&limit=20&media=music&entity=song';
-      
-      let response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'Musica/1.0'
-        }
-      });
 
-      let data = await response.json();
-      let tracks = [];
+  /**
+   * Returns the iTunes search URL for the given query.
+   * Dart will make this HTTP request and pass the body to processSearchResponse().
+   */
+  getSearchUrl: function(query) {
+    return 'https://itunes.apple.com/search?term=' +
+      encodeURIComponent(query) +
+      '&limit=25&media=music&entity=song';
+  },
+
+  /**
+   * Receives the raw HTTP response body from Dart and returns a JSON-encoded
+   * array of track objects.
+   */
+  processSearchResponse: function(body) {
+    try {
+      var data = JSON.parse(body);
+      var tracks = [];
 
       if (data && data.results && data.results.length > 0) {
-        for (let i = 0; i < data.results.length; i++) {
-          let track = data.results[i];
+        for (var i = 0; i < data.results.length; i++) {
+          var track = data.results[i];
           if (!track.trackName) continue;
-          
-          // Get higher resolution artwork (replace 100x100 with 300x300)
-          let artUrl = (track.artworkUrl100 || '').replace('100x100', '300x300');
-          
+
+          // Upgrade artwork from 100x100 to 300x300
+          var art = (track.artworkUrl100 || '').replace('100x100bb', '300x300bb');
+
           tracks.push({
             id: 'itunes_' + (track.trackId || i),
-            title: track.trackName || 'Unknown Title',
+            title: track.trackName,
             artist: track.artistName || 'Unknown Artist',
             album: track.collectionName || '',
-            albumArt: artUrl,
-            durationMs: track.trackTimeMillis || 180000,
-            previewUrl: track.previewUrl || ''
+            albumArt: art,
+            durationMs: track.trackTimeMillis || 180000
           });
         }
-        return JSON.stringify(tracks);
       }
 
-      // Empty result set but successful response
-      return JSON.stringify([]);
-
+      return JSON.stringify(tracks);
     } catch (e) {
-      // Offline fallback mock data with plausible results
-      let fallback = [
-        {
-          id: 'mock_' + query.replace(/\s+/g, '_') + '_1',
-          title: query,
-          artist: 'Search Result (Offline)',
-          albumArt: '',
-          durationMs: 210000
-        },
-        {
-          id: 'mock_' + query.replace(/\s+/g, '_') + '_2',
-          title: query + ' (Live Version)',
-          artist: 'Search Result (Offline)',
-          albumArt: '',
-          durationMs: 245000
-        }
-      ];
-      return JSON.stringify(fallback);
+      // Return empty array on parse error
+      return '[]';
     }
+  },
+
+  /**
+   * Offline fallback – called when the HTTP request fails.
+   */
+  getFallbackResults: function(query) {
+    var fallback = [
+      {
+        id: 'offline_1_' + query,
+        title: query,
+        artist: 'Offline Mode',
+        album: '',
+        albumArt: '',
+        durationMs: 210000
+      },
+      {
+        id: 'offline_2_' + query,
+        title: query + ' (Remix)',
+        artist: 'Offline Mode',
+        album: '',
+        albumArt: '',
+        durationMs: 195000
+      }
+    ];
+    return JSON.stringify(fallback);
   }
 };
