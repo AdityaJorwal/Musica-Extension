@@ -2,31 +2,82 @@
   {
     "id": "jiosaavn",
     "name": "JioSaavn",
-    "description": "Search 100M+ Indian & international songs via JioSaavn. Returns real stream URLs (320kbps AAC).",
-    "version": "1.1.0",
-    "author": "Musica",
+    "description": "Search 100M+ regional and international tracks with high-quality 320kbps streams.",
+    "version": "0.29.43",
     "classification": "METADATA",
     "script": "jiosaavn.js",
     "isActive": true
   },
   {
     "id": "spotify",
-    "name": "iTunes / Spotify Catalog",
-    "description": "Search millions of western & regional songs via iTunes/Spotify API. Stream resolver finds audio automatically.",
-    "version": "1.1.0",
-    "author": "Musica",
+    "name": "Spotify Catalog",
+    "description": "Worldwide music catalog querying via unauthenticated iTunes bridge index.",
+    "version": "0.29.43",
     "classification": "METADATA",
     "script": "spotify.js",
     "isActive": true
   },
   {
+    "id": "gaana",
+    "name": "Gaana Engine",
+    "description": "Indian Bollywood and regional metadata search index handler.",
+    "version": "0.29.43",
+    "classification": "METADATA",
+    "script": "gaana.js",
+    "isActive": true
+  },
+  {
     "id": "youtube",
     "name": "Audio Stream Resolver",
-    "description": "Active audio stream resolver that finds direct, high-quality streams from public endpoints.",
-    "version": "2.1.0",
-    "author": "Musica",
+    "description": "Dynamic keyless stream resolver that finds direct streams via JioSaavn.",
+    "version": "0.29.43",
     "classification": "STREAMER",
     "script": "youtube.js",
+    "isActive": true
+  },
+  {
+    "id": "soundcloud",
+    "name": "SoundCloud Free",
+    "description": "Streams indie and user-uploaded content over open client keys.",
+    "version": "0.29.43",
+    "classification": "STREAMER",
+    "script": "soundcloud.js",
+    "isActive": true
+  },
+  {
+    "id": "jamendo",
+    "name": "Jamendo Sync",
+    "description": "Completely free open music download assets under Creative Commons licenses.",
+    "version": "0.29.43",
+    "classification": "STREAMER",
+    "script": "jamendo.js",
+    "isActive": false
+  },
+  {
+    "id": "lrclib",
+    "name": "LrcLib Engine",
+    "description": "Fetches synchronized time-stamped text files matching playback times.",
+    "version": "0.29.43",
+    "classification": "LYRICS",
+    "script": "lrclib.js",
+    "isActive": true
+  },
+  {
+    "id": "musixmatch",
+    "name": "Musixmatch",
+    "description": "Fallback text rendering engine for main translation layers.",
+    "version": "0.29.43",
+    "classification": "LYRICS",
+    "script": "musixmatch.js",
+    "isActive": true
+  },
+  {
+    "id": "genius",
+    "name": "Genius Data",
+    "description": "Provides background info and static lyrics layers.",
+    "version": "0.29.43",
+    "classification": "LYRICS",
+    "script": "genius.js",
     "isActive": true
   }
 ]
