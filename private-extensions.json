@@ -1,18 +1,32 @@
 [
   {
+    "id": "jiosaavn",
+    "name": "JioSaavn",
+    "description": "Search 100M+ Indian & international songs via JioSaavn. Returns real stream URLs (320kbps AAC).",
+    "version": "1.1.0",
+    "author": "Musica",
+    "classification": "METADATA",
+    "script": "jiosaavn.js",
+    "isActive": true
+  },
+  {
     "id": "spotify",
-    "name": "Spotify Catalog",
-    "version": "1.0.0",
+    "name": "iTunes / Spotify Catalog",
+    "description": "Search millions of western & regional songs via iTunes/Spotify API. Stream resolver finds audio automatically.",
+    "version": "1.1.0",
+    "author": "Musica",
     "classification": "METADATA",
     "script": "spotify.js",
-    "dependencies": ["youtube"]
+    "isActive": true
   },
   {
     "id": "youtube",
-    "name": "YouTube Streams",
-    "version": "1.0.0",
+    "name": "Audio Stream Resolver",
+    "description": "Active audio stream resolver that finds direct, high-quality streams from public endpoints.",
+    "version": "2.1.0",
+    "author": "Musica",
     "classification": "STREAMER",
     "script": "youtube.js",
-    "dependencies": []
+    "isActive": true
   }
 ]
