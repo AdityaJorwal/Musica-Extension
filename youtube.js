@@ -1,4 +1,4 @@
-var youtube = {
+globalThis.youtube = {
   resolveStream: async function(title, artist, duration) {
     // Standard testing stream sources for audio rendering and local caching
     let streams = [

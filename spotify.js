@@ -1,4 +1,4 @@
-var spotify = {
+globalThis.spotify = {
   search: async function(query) {
     try {
       // Fetches live unauthenticated iTunes Music search catalog to populate Spotify metadata
