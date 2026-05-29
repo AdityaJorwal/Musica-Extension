@@ -12,7 +12,7 @@ globalThis.youtube = {
    * 1. THE SEARCH LAYER: Allows searching YouTube directly.
    */
   getSearchUrl: function(query) {
-    return 'https://vid.puffyan.us/api/v1/search?q=' + encodeURIComponent(query) + '&type=video';
+    return 'https://invidious.flokinet.to/api/v1/search?q=' + encodeURIComponent(query) + '&type=video';
   },
 
   /**
@@ -39,7 +39,7 @@ globalThis.youtube = {
           album: 'YouTube Video',
           albumArt: albumArt,
           durationMs: (video.lengthSeconds || 180) * 1000,
-          streamUrl: 'https://vid.puffyan.us/latest_version?id=' + video.videoId + '&itag=140', 
+          streamUrl: 'https://invidious.flokinet.to/latest_version?id=' + video.videoId + '&itag=140', 
           source_extension: 'youtube'
         });
       }
@@ -55,7 +55,7 @@ globalThis.youtube = {
    */
   getResolveUrl: function(title, artist, duration) {
     var query = (title || '') + ' ' + (artist || '');
-    return 'https://vid.puffyan.us/api/v1/search?q=' + encodeURIComponent(query) + '&type=video';
+    return 'https://invidious.flokinet.to/api/v1/search?q=' + encodeURIComponent(query) + '&type=video';
   },
 
   processResolveResponse: function(body) {
@@ -64,7 +64,7 @@ globalThis.youtube = {
       if (data && data.length > 0) {
         var video = data[0];
         if (video.videoId) {
-          return 'https://vid.puffyan.us/latest_version?id=' + video.videoId + '&itag=140';
+          return 'https://invidious.flokinet.to/latest_version?id=' + video.videoId + '&itag=140';
         }
       }
     } catch (e) {}

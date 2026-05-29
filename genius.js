@@ -1,47 +1,34 @@
 /**
- * Musica Extension – Genius Data
+ * Musica Extension – Lyrics.ovh Engine
  * Protocol v2: Synchronous URL builder + response processor for lyrics.
+ * Uses lyrics.ovh completely free public API (no key needed).
  */
 globalThis.genius = {
 
   /**
-   * Returns the Genius multi-search endpoint URL.
+   * Returns the lyrics.ovh search URL.
+   * Format: https://api.lyrics.ovh/v1/{artist}/{title}
    */
   getSearchUrl: function(title, artist, durationMs) {
-    var query = (title || '') + ' ' + (artist || '');
-    return 'https://genius.com/api/search/multi?q=' + encodeURIComponent(query.trim());
+    var a = (artist || 'Unknown').trim();
+    var t = (title || '').trim();
+    // Remove common bracketed suffixes like (feat. xxx), [Official Video], etc.
+    t = t.replace(/\s*[\(\[][^\)\]]*[\)\]]/g, '').trim();
+    return 'https://api.lyrics.ovh/v1/' + encodeURIComponent(a) + '/' + encodeURIComponent(t);
   },
 
   /**
-   * Parses the search results and extracts the Genius page path.
+   * Parses the lyrics.ovh response which returns { lyrics: "..." }.
    */
   processLyricsResponse: function(body) {
     try {
       var data = JSON.parse(body);
-      if (data && data.response && data.response.sections) {
-        var sections = data.response.sections;
-        for (var s = 0; s < sections.length; s++) {
-          var sec = sections[s];
-          if (sec.type === 'song' || sec.type === 'top_hit') {
-            var hits = sec.hits;
-            if (hits && hits.length > 0) {
-              var result = hits[0].result;
-              if (result && result.path) {
-                // Return page path so app can scrape/render if needed
-                return JSON.stringify({
-                  hasLyrics: true,
-                  path: result.path,
-                  title: result.title,
-                  artist: result.artist_names
-                });
-              }
-            }
-          }
-        }
+      if (data && data.lyrics && data.lyrics.trim().length > 10) {
+        return data.lyrics.trim();
       }
       return '';
-    } catch (e) { 
-      return ''; 
+    } catch (e) {
+      return '';
     }
   }
 };

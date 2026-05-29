@@ -1,35 +1,45 @@
 /**
- * Musica Extension – Musixmatch Fallback
+ * Musica Extension – ChartLyrics Lyrics Engine
  * Protocol v2: Synchronous URL builder + response processor for lyrics.
+ * Uses ChartLyrics public API (no key required) to fetch actual lyric text.
  */
 globalThis.musixmatch = {
 
   /**
-   * Returns the track search URL to find the Musixmatch track ID.
+   * Returns the ChartLyrics search URL.
+   * ChartLyrics SearchLyric is a free public REST API.
    */
   getSearchUrl: function(title, artist, durationMs) {
-    var apiKey = "2d5672e8113264abda9197c88b7764f6";
-    return 'https://api.musixmatch.com/ws/1.1/track.search?q_track=' + encodeURIComponent(title) +
-      '&q_artist=' + encodeURIComponent(artist) + '&page_size=1&format=json&apikey=' + apiKey;
+    // SearchLyricDirect returns the LyricText directly
+    return 'http://api.chartlyrics.com/apiv1.asmx/SearchLyricDirect?artist=' +
+      encodeURIComponent((artist || '').trim()) +
+      '&song=' + encodeURIComponent((title || '').trim());
   },
 
   /**
-   * Processes the search response and extracts track ID.
+   * Processes the ChartLyrics XML response and extracts the lyric text.
+   * The response is XML: <GetLyricResult><LyricChecksum>...<LyricSong>...<LyricArtist>...<LyricText>LYRICS</LyricText>...
    */
   processLyricsResponse: function(body) {
     try {
-      var data = JSON.parse(body);
-      var trackList = data.message.body.track_list;
-      if (trackList && trackList.length > 0) {
-        // Return track ID as a JSON reference string
-        return JSON.stringify({
-          hasLyrics: true,
-          id: trackList[0].track.track_id
-        });
+      if (!body || body.trim().length === 0) return '';
+
+      // Extract LyricText from XML using regex (no DOM available in QuickJS)
+      var match = body.match(/<LyricText>([\s\S]*?)<\/LyricText>/);
+      if (match && match[1]) {
+        var lyrics = match[1]
+          .replace(/&amp;/g, '&')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"')
+          .replace(/&apos;/g, "'")
+          .replace(/&#xD;/g, '')
+          .trim();
+        if (lyrics.length > 10) return lyrics;
       }
       return '';
-    } catch (e) { 
-      return ''; 
+    } catch (e) {
+      return '';
     }
   }
 };

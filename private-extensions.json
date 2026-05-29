@@ -64,18 +64,18 @@
   },
   {
     "id": "musixmatch",
-    "name": "Musixmatch",
-    "description": "Fallback text rendering engine for main translation layers.",
-    "version": "0.29.43",
+    "name": "ChartLyrics Engine",
+    "description": "Fetches plain lyrics using the ChartLyrics free public API (no key required).",
+    "version": "0.30.0",
     "classification": "LYRICS",
     "script": "musixmatch.js",
     "isActive": true
   },
   {
     "id": "genius",
-    "name": "Genius Data",
-    "description": "Provides background info and static lyrics layers.",
-    "version": "0.29.43",
+    "name": "Lyrics.ovh Engine",
+    "description": "Fetches plain lyrics from Lyrics.ovh completely free public API.",
+    "version": "0.30.0",
     "classification": "LYRICS",
     "script": "genius.js",
     "isActive": true
