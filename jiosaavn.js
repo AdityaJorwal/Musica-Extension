@@ -27,7 +27,7 @@ globalThis.jiosaavn = {
 
         // Decrypt stream URL
         var streamUrl = '';
-        if (song.more_info && song.more_info.encrypted_media_url) {
+        if (song && song.more_info && song.more_info.encrypted_media_url) {
           try {
             var ciphertext = song.more_info.encrypted_media_url;
             var decrypted = CryptoJS.DES.decrypt(
@@ -87,6 +87,9 @@ globalThis.jiosaavn = {
   },
 
   getResolveUrl: function(title, artist, duration) {
+    this._resolveTitle = title || '';
+    this._resolveArtist = artist || '';
+    this._resolveDuration = parseInt(duration || 0, 10);
     var query = (title || '') + ' ' + (artist || '');
     return 'https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&api_version=4&ctx=web6dot0&q=' +
       encodeURIComponent(query.trim());
@@ -96,7 +99,16 @@ globalThis.jiosaavn = {
     try {
       var data = JSON.parse(body);
       if (data && data.results && data.results.length > 0) {
-        var song = data.results[0];
+        var song = null;
+        var bestScore = -1;
+        for (var i = 0; i < data.results.length; i++) {
+          var candidate = data.results[i];
+          var score = this._scoreCandidate(candidate);
+          if (score > bestScore) {
+            bestScore = score;
+            song = candidate;
+          }
+        }
         if (song.more_info && song.more_info.encrypted_media_url) {
           var ciphertext = song.more_info.encrypted_media_url;
           var decrypted = CryptoJS.DES.decrypt(
@@ -111,6 +123,43 @@ globalThis.jiosaavn = {
       }
     } catch (e) {}
     return '';
+  },
+
+  _scoreCandidate: function(song) {
+    var targetTitle = this._normalise(this._resolveTitle);
+    var targetArtist = this._normalise(this._resolveArtist);
+    var title = this._normalise(song.title || '');
+    var subtitle = this._normalise(song.subtitle || '');
+    var score = 0;
+
+    if (title === targetTitle) score += 80;
+    if (title.indexOf(targetTitle) !== -1 || targetTitle.indexOf(title) !== -1) {
+      score += 25;
+    }
+    var titleTokens = targetTitle.split(' ');
+    for (var i = 0; i < titleTokens.length; i++) {
+      if (titleTokens[i] && title.indexOf(titleTokens[i]) !== -1) score += 8;
+    }
+    var artistTokens = targetArtist.split(' ');
+    for (var j = 0; j < artistTokens.length; j++) {
+      if (artistTokens[j] && subtitle.indexOf(artistTokens[j]) !== -1) score += 6;
+    }
+    if (this._resolveDuration && song.more_info && song.more_info.duration) {
+      var delta = Math.abs(parseInt(song.more_info.duration, 10) - this._resolveDuration);
+      if (delta <= 3) score += 18;
+      else if (delta <= 10) score += 8;
+      else if (delta > 45) score -= 12;
+    }
+    return score;
+  },
+
+  _normalise: function(value) {
+    return (value || '')
+      .toLowerCase()
+      .replace(/&[^;]+;/g, ' ')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
   },
 
   getFallbackResults: function(query) {
