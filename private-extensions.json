@@ -1,83 +1,83 @@
 [
   {
-    "id": "jiosaavn",
-    "name": "JioSaavn",
-    "description": "Search 100M+ regional and international tracks with direct 320kbps stream links.",
-    "version": "0.31.0",
-    "classification": "STREAMER",
-    "script": "jiosaavn.js",
-    "isActive": true
-  },
-  {
     "id": "spotify",
     "name": "Spotify Catalog",
-    "description": "Worldwide music catalog querying via unauthenticated iTunes bridge index.",
-    "version": "0.29.43",
+    "description": "Worldwide music catalog via iTunes metadata index. Play back resolves through JioSaavn or YouTube.",
+    "version": "0.32.0",
     "classification": "METADATA",
     "script": "spotify.js",
     "isActive": true
   },
   {
-    "id": "gaana",
-    "name": "Gaana Engine",
-    "description": "Indian Bollywood and regional metadata search index handler.",
-    "version": "0.29.43",
-    "classification": "METADATA",
-    "script": "gaana.js",
+    "id": "jiosaavn",
+    "name": "JioSaavn",
+    "description": "Search and stream 100M+ regional and international tracks with direct 320kbps links.",
+    "version": "0.32.0",
+    "classification": "STREAMER",
+    "script": "jiosaavn.js",
     "isActive": true
   },
   {
     "id": "youtube",
     "name": "YouTube Audio",
-    "description": "Search and resolve YouTube audio with ordered failover across public Invidious APIs.",
-    "version": "0.31.0",
+    "description": "Search and stream YouTube audio via native resolver with Invidious failover.",
+    "version": "0.32.0",
     "classification": "STREAMER",
     "script": "youtube.js",
     "isActive": true
   },
   {
+    "id": "lrclib",
+    "name": "LrcLib Engine",
+    "description": "Synced LRC lyrics matched by title, artist, and duration.",
+    "version": "0.32.0",
+    "classification": "LYRICS",
+    "script": "lrclib.js",
+    "isActive": true
+  },
+  {
+    "id": "gaana",
+    "name": "Gaana Engine",
+    "description": "Indian Bollywood metadata index (optional).",
+    "version": "0.29.43",
+    "classification": "METADATA",
+    "script": "gaana.js",
+    "isActive": false
+  },
+  {
     "id": "soundcloud",
     "name": "SoundCloud Free",
-    "description": "Search and stream indie and user-uploaded tracks directly from SoundCloud via public keys.",
+    "description": "Indie and user-uploaded tracks from SoundCloud.",
     "version": "0.30.0",
     "classification": "STREAMER",
     "script": "soundcloud.js",
-    "isActive": true
+    "isActive": false
   },
   {
     "id": "jamendo",
     "name": "Jamendo Sync",
-    "description": "Completely free open music download assets under Creative Commons licenses.",
+    "description": "Creative Commons catalog.",
     "version": "0.29.43",
     "classification": "STREAMER",
     "script": "jamendo.js",
     "isActive": false
   },
   {
-    "id": "lrclib",
-    "name": "LrcLib Engine",
-    "description": "Fetches synchronized time-stamped text files matching playback times.",
-    "version": "0.29.43",
-    "classification": "LYRICS",
-    "script": "lrclib.js",
-    "isActive": true
-  },
-  {
     "id": "musixmatch",
     "name": "ChartLyrics Engine",
-    "description": "Fetches plain lyrics using the ChartLyrics free public API (no key required).",
+    "description": "Plain lyrics via ChartLyrics API.",
     "version": "0.30.0",
     "classification": "LYRICS",
     "script": "musixmatch.js",
-    "isActive": true
+    "isActive": false
   },
   {
     "id": "genius",
     "name": "Lyrics.ovh Engine",
-    "description": "Fetches plain lyrics from Lyrics.ovh completely free public API.",
+    "description": "Plain lyrics via Lyrics.ovh API.",
     "version": "0.30.0",
     "classification": "LYRICS",
     "script": "genius.js",
-    "isActive": true
+    "isActive": false
   }
 ]
