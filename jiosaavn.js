@@ -7,6 +7,7 @@
  */
 globalThis.jiosaavn = {
   getSearchUrl: function(query) {
+    this._searchQuery = query || '';
     return 'https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&api_version=4&ctx=web6dot0&q=' +
       encodeURIComponent(query);
   },
@@ -80,6 +81,7 @@ globalThis.jiosaavn = {
         });
       }
 
+      tracks = this._filterByQuery(tracks, this._searchQuery);
       return JSON.stringify(tracks);
     } catch (e) {
       return '[]';
@@ -160,6 +162,41 @@ globalThis.jiosaavn = {
       .replace(/[^a-z0-9]+/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
+  },
+
+  _filterByQuery: function(tracks, query) {
+    var tokens = this._normalise(query).split(' ').filter(function(t) {
+      return t.length > 1;
+    });
+    if (tokens.length === 0) return tracks;
+
+    var aliases = {
+      sona: ['sohna'],
+      sohna: ['sona'],
+      phul: ['phool', 'ful', 'phull'],
+      phool: ['phul', 'ful']
+    };
+
+    function matchesToken(haystack, token) {
+      if (haystack.indexOf(token) !== -1) return true;
+      var list = aliases[token] || [];
+      for (var i = 0; i < list.length; i++) {
+        if (haystack.indexOf(list[i]) !== -1) return true;
+      }
+      return false;
+    }
+
+    return tracks.filter(function(track) {
+      var haystack = jiosaavn._normalise(
+        (track.title || '') + ' ' + (track.artist || '')
+      );
+      var matched = 0;
+      for (var i = 0; i < tokens.length; i++) {
+        if (matchesToken(haystack, tokens[i])) matched++;
+      }
+      var required = tokens.length >= 3 ? 2 : tokens.length;
+      return matched >= required;
+    });
   },
 
   getFallbackResults: function(query) {

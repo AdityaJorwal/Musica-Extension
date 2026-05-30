@@ -1,22 +1,21 @@
 /**
  * Musica Extension - YouTube Audio
- * Protocol v3: ordered search failover + track-specific audio resolution.
- *
- * The public hosts below are drawn from the official Invidious instance list.
- * Public instances can still fail temporarily, so Dart tries them in order.
+ * Search via Invidious; playback resolves natively in Dart via youtube_explode.
  */
 globalThis.youtube = {
   instances: [
     'https://inv.thepixora.com',
-    'https://yt.chocolatemoo53.com',
+    'https://invidious.f5.si',
     'https://inv.nadeko.net',
-    'https://invidious.nerdvpn.de'
+    'https://yt.chocolatemoo53.com'
   ],
 
   getSearchUrls: function(query) {
+    this._searchQuery = query || '';
+    var musicQuery = query + ' song';
     return this.instances.map(function(instance) {
       return instance + '/api/v1/search?q=' +
-        encodeURIComponent(query) +
+        encodeURIComponent(musicQuery) +
         '&type=video&sort_by=relevance&fields=videoId,title,author,lengthSeconds,videoThumbnails';
     });
   },
@@ -39,6 +38,9 @@ globalThis.youtube = {
         if (!video.title || !video.videoId) continue;
         if (video.lengthSeconds && video.lengthSeconds > 900) continue;
 
+        var score = this._scoreVideo(video, this._searchQuery);
+        if (score < 20) continue;
+
         var albumArt = '';
         var thumbs = video.videoThumbnails || [];
         for (var t = 0; t < thumbs.length; t++) {
@@ -58,13 +60,78 @@ globalThis.youtube = {
           albumArt: albumArt,
           durationMs: (video.lengthSeconds || 180) * 1000,
           streamUrl: '',
-          source_extension: 'youtube'
+          source_extension: 'youtube',
+          _rankScore: score
         });
       }
+
+      tracks.sort(function(a, b) {
+        return (b._rankScore || 0) - (a._rankScore || 0);
+      });
+
+      for (var j = 0; j < tracks.length; j++) {
+        delete tracks[j]._rankScore;
+      }
+
       return JSON.stringify(tracks);
     } catch (e) {
       return '[]';
     }
+  },
+
+  _normalise: function(value) {
+    return (value || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  },
+
+  _scoreVideo: function(video, query) {
+    var tokens = this._normalise(query).split(' ').filter(function(t) {
+      return t.length > 1;
+    });
+    if (tokens.length === 0) return 0;
+
+    var haystack = this._normalise(
+      (video.title || '') + ' ' + (video.author || '')
+    );
+    var aliases = {
+      sona: ['sohna'],
+      sohna: ['sona'],
+      phul: ['phool', 'ful', 'phull'],
+      phool: ['phul', 'ful']
+    };
+    var score = 0;
+    var matched = 0;
+
+    for (var i = 0; i < tokens.length; i++) {
+      var token = tokens[i];
+      var found = haystack.indexOf(token) !== -1;
+      if (!found) {
+        var list = aliases[token] || [];
+        for (var j = 0; j < list.length; j++) {
+          if (haystack.indexOf(list[j]) !== -1) {
+            found = true;
+            break;
+          }
+        }
+      }
+      if (found) {
+        matched++;
+        score += 18;
+      }
+    }
+
+    if (matched === tokens.length) score += 30;
+    if (matched <= 1 && tokens.length >= 2) score -= 25;
+
+    var bad = ['cover', 'karaoke', 'remix', 'live', 'vlog', 'reaction'];
+    for (var b = 0; b < bad.length; b++) {
+      if (haystack.indexOf(bad[b]) !== -1) score -= 15;
+    }
+
+    return score;
   },
 
   processResolveResponse: function(body) {
@@ -81,7 +148,10 @@ globalThis.youtube = {
         var bitrate = parseInt(format.bitrate || 0, 10);
 
         if (!url || mime.indexOf('audio/') !== 0) continue;
-        if (bitrate > bestBitrate) {
+        if (mime.indexOf('mp4') !== -1 && bitrate >= bestBitrate) {
+          bestBitrate = bitrate;
+          bestUrl = url;
+        } else if (!bestUrl && bitrate > bestBitrate) {
           bestBitrate = bitrate;
           bestUrl = url;
         }
