@@ -133,6 +133,7 @@ globalThis.jiosaavn = {
   _scoreCandidate: function(song) {
     var targetTitle = this._normalise(this._resolveTitle);
     var targetArtistRaw = this._resolveArtist || '';
+    var targetArtist = this._normalise(targetArtistRaw);
     var title = this._normalise(song.title || '');
     var subtitle = this._normalise(song.subtitle || '');
     var score = 0;
