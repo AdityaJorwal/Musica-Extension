@@ -21,8 +21,8 @@ globalThis.spotify = {
           if (!track.trackName) continue;
 
           var art = (track.artworkUrl100 || '')
-            .replace('100x100bb', '600x600bb')
-            .replace('100x100', '600x600');
+            .replace('100x100bb', '1000x1000bb')
+            .replace('100x100', '1000x1000');
 
           tracks.push({
             id: 'itunes_' + (track.trackId || i),
@@ -32,7 +32,9 @@ globalThis.spotify = {
             albumArt: art,
             durationMs: track.trackTimeMillis || 180000,
             previewUrl: track.previewUrl || '',
-            source_extension: 'spotify'
+            source_extension: 'spotify',
+            apiIndex: i,
+            api_index: i
           });
         }
       }

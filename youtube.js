@@ -41,26 +41,25 @@ globalThis.youtube = {
         var score = this._scoreVideo(video, this._searchQuery);
         if (score < 20) continue;
 
-        var albumArt = '';
-        var thumbs = video.videoThumbnails || [];
-        for (var t = 0; t < thumbs.length; t++) {
-          if (thumbs[t].quality === 'high' || thumbs[t].quality === 'medium') {
-            albumArt = thumbs[t].url;
-            break;
-          }
-        }
-        if (!albumArt && thumbs.length > 0) albumArt = thumbs[0].url;
+        // Ignore videoThumbnails array and manually construct high-res maxresdefault thumbnail URL
+        var albumArt = 'https://img.youtube.com/vi/' + video.videoId + '/maxresdefault.jpg';
+        
+        // Check if official topic channel
+        var isOfficialTrack = (video.author || '').indexOf(' - Topic') !== -1;
 
         tracks.push({
           id: 'youtube_' + video.videoId,
           resourceId: video.videoId,
-          title: video.title,
-          artist: video.author || 'YouTube',
-          album: 'YouTube',
+          title: video.title.replace(/(\s*-\s*Topic|\s*\[.*?\]|\s*\(.*?\))/gi, '').trim(),
+          artist: (video.author || 'YouTube').replace(' - Topic', '').trim(),
+          album: isOfficialTrack ? 'Official Single' : 'YouTube Audio',
           albumArt: albumArt,
           durationMs: (video.lengthSeconds || 180) * 1000,
           streamUrl: '',
           source_extension: 'youtube',
+          isOfficial: isOfficialTrack,
+          apiIndex: i,
+          api_index: i,
           _rankScore: score
         });
       }

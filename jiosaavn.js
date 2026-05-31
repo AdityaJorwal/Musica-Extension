@@ -77,7 +77,9 @@ globalThis.jiosaavn = {
           albumArt: albumArt,
           durationMs: durationMs,
           streamUrl: streamUrl,
-          source_extension: 'jiosaavn'
+          source_extension: 'jiosaavn',
+          apiIndex: i,
+          api_index: i
         });
       }
 
