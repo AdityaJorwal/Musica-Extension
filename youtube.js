@@ -164,6 +164,51 @@ globalThis.youtube = {
     return seconds || 180;
   },
 
+  getRecommendationsUrl: function(videoId) {
+    return '/suggestions/' + encodeURIComponent(videoId);
+  },
+
+  processRecommendationsResponse: function(body) {
+    try {
+      var data = JSON.parse(body);
+      var suggestions = data.relatedStreams || [];
+      var recommendedTracks = [];
+
+      for (var i = 0; i < Math.min(suggestions.length, 5); i++) {
+        var video = suggestions[i];
+        if (!video.url || video.type !== 'video') continue;
+        
+        var extractedId = video.url.split('v=')[1] || '';
+        if (!extractedId) continue;
+
+        var squareArt = video.thumbnail || 'https://img.youtube.com/vi/' + extractedId + '/maxresdefault.jpg';
+        if (squareArt.indexOf('=w') !== -1) {
+          squareArt = squareArt.split('=w')[0] + '=w544-h544-l90-rj';
+        } else if (squareArt.indexOf('lh3.googleusercontent.com') !== -1) {
+          squareArt = squareArt + '=w544-h544-l90-rj';
+        }
+
+        recommendedTracks.push({
+          id: 'youtube_' + extractedId,
+          resourceId: extractedId,
+          title: video.title.replace(/(\s*-\s*Topic|\s*\[.*?\]|\s*\(.*?\))/gi, '').trim(),
+          artist: (video.uploaderName || 'YouTube Audio').replace(' - Topic', '').trim(),
+          album: 'Recommended Radio',
+          albumArt: squareArt,
+          durationMs: (video.duration || 180) * 1000,
+          streamUrl: '',
+          source_extension: 'youtube',
+          isOfficial: video.uploaderVerified || false,
+          apiIndex: i,
+          api_index: i
+        });
+      }
+      return JSON.stringify(recommendedTracks);
+    } catch (e) {
+      return '[]';
+    }
+  },
+
   processResolveResponse: function(body) {
     return '';
   },
