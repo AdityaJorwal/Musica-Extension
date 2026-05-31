@@ -137,6 +137,15 @@ globalThis.jiosaavn = {
     var subtitle = this._normalise(song.subtitle || '');
     var score = 0;
 
+    // LOCK 1: Primary Artist Anchor Gate
+    // Extract the primary (first) artist by splitting on collaboration delimiters.
+    // If the primary anchor is absent from the JioSaavn subtitle, disqualify the candidate.
+    // This prevents 'Daaku' by Badshah winning when resolving 'Daaku' by R Nait.
+    var primaryAnchor = targetArtist.split(/[\,\;\&]|\s+(?:feat|ft|x|and|vs)\s+/)[0].trim();
+    if (primaryAnchor.length > 1 && subtitle.indexOf(primaryAnchor) === -1) {
+      return -999; // Primary artist missing -> hard reject
+    }
+
     if (title === targetTitle) score += 80;
     if (title.indexOf(targetTitle) !== -1 || targetTitle.indexOf(title) !== -1) {
       score += 25;
