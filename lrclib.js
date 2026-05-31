@@ -4,13 +4,47 @@
  */
 globalThis.lrclib = {
 
-  getSearchUrl: function(title, artist, durationMs) {
-    this._resolveTitle = title || '';
-    this._resolveArtist = artist || '';
+  getSearchUrls: function(title, artist, durationMs) {
+    // Surgical Title Cleansing: Strip out common streaming distribution tags
+    var cleanTitle = (title || '').replace(/(\s*-\s*Topic|\s*-\s*Single|\s*-\s*EP|\s*\[.*?\]|\s*\(.*?\))|\s*-\s*From.*/gi, '').trim();
+    // Isolate the primary artist to prevent collaborator keyword clogging
+    var cleanArtist = (artist || '').split(/,|\s*&\s*|\s*feat\.?\s*/i)[0].trim();
+    
+    this._resolveTitle = cleanTitle;
+    this._resolveArtist = cleanArtist;
     this._resolveDurationMs = parseInt(durationMs || 0, 10);
+    
+    var durationSec = Math.round(this._resolveDurationMs / 1000);
+    var urls = [];
+    
+    // URL 1: Strict get query if duration is valid
+    if (durationSec > 0) {
+      urls.push('https://lrclib.net/api/get?artist=' +
+        encodeURIComponent(cleanArtist) +
+        '&track=' + encodeURIComponent(cleanTitle) +
+        '&duration=' + durationSec);
+    }
+    
+    // URL 2: Broad search query fallback
+    urls.push('https://lrclib.net/api/search?q=' +
+      encodeURIComponent(cleanTitle + ' ' + cleanArtist));
+      
+    return urls;
+  },
+
+  getSearchUrl: function(title, artist, durationMs) {
+    // Surgical Title Cleansing: Strip out common streaming distribution tags
+    var cleanTitle = (title || '').replace(/(\s*-\s*Topic|\s*-\s*Single|\s*-\s*EP|\s*\[.*?\]|\s*\(.*?\))|\s*-\s*From.*/gi, '').trim();
+    // Isolate the primary artist to prevent collaborator keyword clogging
+    var cleanArtist = (artist || '').split(/,|\s*&\s*|\s*feat\.?\s*/i)[0].trim();
+    
+    this._resolveTitle = cleanTitle;
+    this._resolveArtist = cleanArtist;
+    this._resolveDurationMs = parseInt(durationMs || 0, 10);
+    
     return 'https://lrclib.net/api/search?track_name=' +
-      encodeURIComponent(title || '') +
-      '&artist_name=' + encodeURIComponent(artist || '');
+      encodeURIComponent(cleanTitle) +
+      '&artist_name=' + encodeURIComponent(cleanArtist);
   },
 
   processLyricsResponse: function(body) {
@@ -32,6 +66,9 @@ globalThis.lrclib = {
       }
 
       if (!best || bestScore < 15) return '';
+      if (best.instrumental === true) {
+        return '[00:00.00] (Instrumental)';
+      }
       if (best.syncedLyrics) return best.syncedLyrics;
       if (best.plainLyrics) return best.plainLyrics;
       return '';
