@@ -7,7 +7,7 @@ globalThis.spotify = {
     this._searchQuery = query || '';
     return 'https://itunes.apple.com/search?term=' +
       encodeURIComponent(query) +
-      '&limit=30&media=music&entity=song&country=in';
+      '&limit=40&media=music&country=in';
   },
 
   processSearchResponse: function(body) {
@@ -17,21 +17,29 @@ globalThis.spotify = {
 
       if (data && data.results && data.results.length > 0) {
         for (var i = 0; i < data.results.length; i++) {
-          var track = data.results[i];
-          if (!track.trackName) continue;
+          var item = data.results[i];
+          
+          // Determine type based on iTunes wrapperType
+          var entityType = 'song';
+          if (item.wrapperType === 'collection') entityType = 'album';
+          if (item.wrapperType === 'artist') entityType = 'artist';
 
-          var art = (track.artworkUrl100 || '')
-            .replace('100x100bb', '1000x1000bb')
-            .replace('100x100', '1000x1000');
+          var title = item.trackName || item.collectionName || item.artistName;
+          if (!title) continue;
+
+          var art = (item.artworkUrl100 || '')
+            .replace('100x100bb', '600x600bb')
+            .replace('100x100', '600x600');
 
           tracks.push({
-            id: 'itunes_' + (track.trackId || i),
-            title: track.trackName,
-            artist: track.artistName || 'Unknown Artist',
-            album: track.collectionName || '',
+            id: 'itunes_' + (item.trackId || item.collectionId || item.artistId || i),
+            title: title,
+            artist: item.artistName || 'Various Artists',
+            album: item.collectionName || '',
             albumArt: art,
-            durationMs: track.trackTimeMillis || 180000,
-            previewUrl: track.previewUrl || '',
+            durationMs: item.trackTimeMillis || 180000,
+            previewUrl: item.previewUrl || '',
+            type: entityType, // 🎯 CRITICAL: Tells Dart where to render this card
             source_extension: 'spotify',
             apiIndex: i,
             api_index: i
