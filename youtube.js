@@ -91,14 +91,14 @@ globalThis.youtube = {
             }
             if (textParts.length >= 2) {
               if (textParts[1].indexOf(':') !== -1) {
-                durationMs = this._parseDuration(textParts[1]);
+                durationMs = this._parseDuration(textParts[1]) * 1000;
               } else {
                 album = textParts[1];
               }
             }
             if (textParts.length >= 3) {
               if (textParts[2].indexOf(':') !== -1) {
-                durationMs = this._parseDuration(textParts[2]);
+                durationMs = this._parseDuration(textParts[2]) * 1000;
               }
             }
           }
@@ -141,7 +141,7 @@ globalThis.youtube = {
           streamUrl: '',
           type: 'song',
           source_extension: 'youtube',
-          isOfficial: isOfficialTrack || true,
+          isOfficial: isOfficialTrack,
           apiIndex: i,
           api_index: i
         });
