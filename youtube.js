@@ -211,8 +211,41 @@ globalThis.youtube = {
     }
   },
 
+  // getResolveUrls exposes Piped API endpoints for the video whose ID was set via setResolveContext.
+  // js_sandbox._resolveViaUrls tries each URL in order and calls processResolveResponse on the first 200.
+  getResolveUrls: function(title, artist, durationSeconds) {
+    var vid = this._pendingVideoId || '';
+    if (!vid) return [];
+    return [
+      'https://pipedapi.kavin.rocks/streams/' + vid,
+      'https://pipedapi.moomoo.me/streams/' + vid,
+      'https://piped-api.lunar.icu/streams/' + vid,
+      'https://pipedapi.syncit.xyz/streams/' + vid,
+      'https://pipedapi.tokhmi.xyz/streams/' + vid,
+      'https://pipedapi.adminforge.de/streams/' + vid,
+      'https://api.piped.yt/streams/' + vid,
+      'https://pipedapi.reallyaweso.me/streams/' + vid,
+    ];
+  },
+
+  setResolveContext: function(videoId) {
+    this._pendingVideoId = videoId || '';
+  },
+
   processResolveResponse: function(body) {
-    return '';
+    try {
+      var data = JSON.parse(body);
+      var audioStreams = data.audioStreams || [];
+      if (audioStreams.length === 0) return '';
+      for (var i = 0; i < audioStreams.length; i++) {
+        if ((audioStreams[i].mimeType || '').indexOf('audio/mp4') !== -1) {
+          return audioStreams[i].url || '';
+        }
+      }
+      return audioStreams[0].url || '';
+    } catch (e) {
+      return '';
+    }
   },
 
   getFallbackResults: function(query) {
