@@ -114,7 +114,7 @@ globalThis.jiosaavn = {
             song = candidate;
           }
         }
-        if (song.more_info && song.more_info.encrypted_media_url) {
+        if (song && bestScore > -1 && song.more_info && song.more_info.encrypted_media_url) {
           var ciphertext = song.more_info.encrypted_media_url;
           var decrypted = CryptoJS.DES.decrypt(
             { ciphertext: CryptoJS.enc.Base64.parse(ciphertext) },
