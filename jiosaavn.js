@@ -77,7 +77,6 @@ globalThis.jiosaavn = {
           albumArt: albumArt,
           durationMs: durationMs,
           streamUrl: streamUrl,
-          type: 'song',
           source_extension: 'jiosaavn',
           apiIndex: i,
           api_index: i

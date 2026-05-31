@@ -32,7 +32,6 @@ globalThis.gaana = {
             album: item.album_title || '',
             albumArt: item.track_image || '',
             durationMs: parseInt(item.duration || 180) * 1000,
-            type: 'song',
             source_extension: 'gaana'
           });
         }
