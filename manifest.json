@@ -1,0 +1,80 @@
+[
+  {
+    "schemaVersion": 1,
+    "id": "spotify",
+    "name": "Spotify Catalog",
+    "description": "Worldwide music catalog via iTunes metadata index. Play back resolves through JioSaavn or YouTube.",
+    "version": "0.32.0",
+    "classification": "METADATA",
+    "script": "spotify.js",
+    "sha256": "207BD91D60425160E4D2305F2BC9FAD6DB938A40CD1B55F1042D014B64C189D3",
+    "capabilities": ["metadataLookup", "charts", "recommendations"],
+    "allowedHosts": ["itunes.apple.com"],
+    "permissions": []
+  },
+  {
+    "schemaVersion": 1,
+    "id": "jiosaavn",
+    "name": "JioSaavn Streamer",
+    "description": "Search and stream 100M+ regional and international tracks with direct 320kbps links.",
+    "version": "0.32.0",
+    "classification": "STREAMER",
+    "script": "jiosaavn.js",
+    "sha256": "E023E7610B06D727D6B178C2C03A2ED1546C4A02213CD6FB8134D5326923D4A5",
+    "capabilities": ["catalogSearch", "streamPlayback", "download"],
+    "allowedHosts": ["saavn.me", "jiosaavn.com"],
+    "permissions": []
+  },
+  {
+    "schemaVersion": 1,
+    "id": "youtube",
+    "name": "YouTube Audio Streamer",
+    "description": "Search and stream YouTube audio via native resolver with Invidious failover.",
+    "version": "0.32.0",
+    "classification": "STREAMER",
+    "script": "youtube.js",
+    "sha256": "BCE2B476C4A48B9C1654270EEF4CAEEAA28082EAD83AEAC6F8E7B811FDB02292",
+    "capabilities": ["catalogSearch", "streamPlayback", "download", "recommendations"],
+    "allowedHosts": ["youtube.com", "pipedapi.kavin.rocks", "invidious.io"],
+    "permissions": []
+  },
+  {
+    "schemaVersion": 1,
+    "id": "lrclib",
+    "name": "LrcLib Synced Lyrics",
+    "description": "Synced LRC lyrics matched by title, artist, and duration.",
+    "version": "0.32.0",
+    "classification": "LYRICS",
+    "script": "lrclib.js",
+    "sha256": "5B38877EC985A96CE85BF65CCE364E80114A95FF311C9D77CCECF8EB3A313930",
+    "capabilities": ["lyrics"],
+    "allowedHosts": ["lrclib.net"],
+    "permissions": []
+  },
+  {
+    "schemaVersion": 1,
+    "id": "soundcloud",
+    "name": "SoundCloud Streamer",
+    "description": "Indie and user-uploaded tracks from SoundCloud.",
+    "version": "0.30.0",
+    "classification": "STREAMER",
+    "script": "soundcloud.js",
+    "sha256": "55C5E7688F49ADCABBDE0F0C58BAC98A3E99DA26757CE198E9DB8AEC06ED80B9",
+    "capabilities": ["catalogSearch", "streamPlayback"],
+    "allowedHosts": ["soundcloud.com", "sndcdn.com"],
+    "permissions": []
+  },
+  {
+    "schemaVersion": 1,
+    "id": "musixmatch",
+    "name": "Musixmatch Lyrics",
+    "description": "Plain lyrics via Musixmatch parser.",
+    "version": "0.30.0",
+    "classification": "LYRICS",
+    "script": "musixmatch.js",
+    "sha256": "4EEF9FC7B0BA1C633EEDF97489A8023AF70D73A8EAAA22B276D2B676FA2BB38F",
+    "capabilities": ["lyrics"],
+    "allowedHosts": ["musixmatch.com"],
+    "permissions": []
+  }
+]
