@@ -20,7 +20,7 @@
     "version": "0.32.0",
     "classification": "STREAMER",
     "script": "jiosaavn.js",
-    "sha256": "E023E7610B06D727D6B178C2C03A2ED1546C4A02213CD6FB8134D5326923D4A5",
+    "sha256": "7E9A67B883F2099B4F6BA0AEEB3BA6837D9A85A175922610E4450F1508E7F172",
     "capabilities": ["catalogSearch", "streamPlayback", "download"],
     "allowedHosts": ["saavn.me", "jiosaavn.com"],
     "permissions": []
@@ -33,7 +33,7 @@
     "version": "0.32.0",
     "classification": "STREAMER",
     "script": "youtube.js",
-    "sha256": "BCE2B476C4A48B9C1654270EEF4CAEEAA28082EAD83AEAC6F8E7B811FDB02292",
+    "sha256": "2F3997DF448B05D6021AF976F77434A5B953C0FBBBF21B611AA91934929450A7",
     "capabilities": ["catalogSearch", "streamPlayback", "download", "recommendations"],
     "allowedHosts": ["youtube.com", "pipedapi.kavin.rocks", "invidious.io"],
     "permissions": []
