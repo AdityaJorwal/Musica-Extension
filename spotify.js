@@ -10,7 +10,7 @@ globalThis.spotify = {
       '&limit=40&media=music&country=in';
   },
 
-  processSearchResponse: function(body) {
+  processSearchResponse: function(body, query) {
     try {
       var data = JSON.parse(body);
       var tracks = [];
@@ -47,7 +47,7 @@ globalThis.spotify = {
         }
       }
 
-      tracks = this._filterByQuery(tracks, this._searchQuery);
+      tracks = this._filterByQuery(tracks, query || this._searchQuery);
       return JSON.stringify(tracks);
     } catch (e) {
       return '[]';
