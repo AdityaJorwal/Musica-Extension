@@ -166,44 +166,118 @@ globalThis.youtube = {
   },
 
   getRecommendationsUrl: function(videoId) {
-    return '/suggestions/' + encodeURIComponent(videoId);
+    return 'youtubei/v1/next?videoId=' + encodeURIComponent(videoId);
   },
 
   processRecommendationsResponse: function(body) {
     try {
       var data = JSON.parse(body);
-      var suggestions = data.relatedStreams || [];
       var recommendedTracks = [];
 
-      for (var i = 0; i < Math.min(suggestions.length, 5); i++) {
-        var video = suggestions[i];
-        if (!video.url || video.type !== 'video') continue;
+      // 1. YouTube official InnerTube next format
+      if (data.contents && data.contents.singleColumnWatchNextResults) {
+        var items = [];
         
-        var extractedId = video.url.split('v=')[1] || '';
-        if (!extractedId) continue;
-
-        var squareArt = video.thumbnail || 'https://img.youtube.com/vi/' + extractedId + '/maxresdefault.jpg';
-        if (squareArt.indexOf('=w') !== -1) {
-          squareArt = squareArt.split('=w')[0] + '=w544-h544-l90-rj';
-        } else if (squareArt.indexOf('lh3.googleusercontent.com') !== -1) {
-          squareArt = squareArt + '=w544-h544-l90-rj';
+        // Helper to recursively find tileRenderer nodes
+        function findTiles(node) {
+          if (!node) return;
+          if (typeof node === 'object') {
+            if (node.tileRenderer) {
+              items.push(node.tileRenderer);
+            }
+            for (var key in node) {
+              if (node.hasOwnProperty(key)) {
+                findTiles(node[key]);
+              }
+            }
+          } else if (Array.isArray(node)) {
+            for (var i = 0; i < node.length; i++) {
+              findTiles(node[i]);
+            }
+          }
         }
+        
+        findTiles(data.contents.singleColumnWatchNextResults);
+        
+        for (var i = 0; i < Math.min(items.length, 12); i++) {
+          var tile = items[i];
+          if (!tile || !tile.onSelectCommand || !tile.onSelectCommand.watchEndpoint) continue;
+          var videoId = tile.onSelectCommand.watchEndpoint.videoId;
+          if (!videoId) continue;
+          
+          var title = '';
+          var artist = 'YouTube Music';
+          
+          if (tile.metadata && tile.metadata.tileMetadataRenderer) {
+            var meta = tile.metadata.tileMetadataRenderer;
+            if (meta.title && meta.title.simpleText) {
+              title = meta.title.simpleText;
+            }
+            try {
+              if (meta.lines && meta.lines.length > 0 && meta.lines[0].lineRenderer && meta.lines[0].lineRenderer.items && meta.lines[0].lineRenderer.items.length > 0) {
+                var lineItem = meta.lines[0].lineRenderer.items[0].lineItemRenderer;
+                if (lineItem.text) {
+                  artist = lineItem.text.simpleText || (lineItem.text.runs && lineItem.text.runs[0] ? lineItem.text.runs[0].text : 'YouTube Music');
+                }
+              }
+            } catch(e) {}
+          }
+          
+          if (!title || title === 'Up next' || title === 'Play all') continue;
+          
+          var cleanTitle = title.replace(/(\s*-\s*Topic|\s*\[.*?\]|\s*\(.*?\))/gi, '').trim();
+          var cleanArtist = artist.replace(/\s*-\s*Topic/gi, '').trim();
+          
+          recommendedTracks.push({
+            id: 'youtube_' + videoId,
+            resourceId: videoId,
+            title: cleanTitle,
+            artist: cleanArtist,
+            album: 'Recommended Radio',
+            albumArt: 'https://img.youtube.com/vi/' + videoId + '/maxresdefault.jpg',
+            durationMs: 200000, // typical track length placeholder
+            streamUrl: '',
+            type: 'song',
+            source_extension: 'youtube',
+            isOfficial: true,
+            apiIndex: i,
+            api_index: i
+          });
+        }
+      } 
+      // 2. Fallback to Piped suggestions format
+      else {
+        var suggestions = data.relatedStreams || [];
+        for (var i = 0; i < Math.min(suggestions.length, 5); i++) {
+          var video = suggestions[i];
+          if (!video.url || video.type !== 'video') continue;
+          
+          var extractedId = video.url.split('v=')[1] || '';
+          if (!extractedId) continue;
 
-        recommendedTracks.push({
-          id: 'youtube_' + extractedId,
-          resourceId: extractedId,
-          title: video.title.replace(/(\s*-\s*Topic|\s*\[.*?\]|\s*\(.*?\))/gi, '').trim(),
-          artist: (video.uploaderName || 'YouTube Audio').replace(' - Topic', '').trim(),
-          album: 'Recommended Radio',
-          albumArt: squareArt,
-          durationMs: (video.duration || 180) * 1000,
-          streamUrl: '',
-          type: 'song',
-          source_extension: 'youtube',
-          isOfficial: video.uploaderVerified || false,
-          apiIndex: i,
-          api_index: i
-        });
+          var squareArt = video.thumbnail || 'https://img.youtube.com/vi/' + extractedId + '/maxresdefault.jpg';
+          if (squareArt.indexOf('=w') !== -1) {
+            squareArt = squareArt.split('=w')[0] + '=w544-h544-l90-rj';
+          } else if (squareArt.indexOf('lh3.googleusercontent.com') !== -1) {
+            squareArt = squareArt + '=w544-h544-l90-rj';
+          }
+
+          recommendedTracks.push({
+            id: 'youtube_' + extractedId,
+            resourceId: extractedId,
+            title: video.title.replace(/(\s*-\s*Topic|\s*\[.*?\]|\s*\(.*?\))/gi, '').trim(),
+            artist: (video.uploaderName || 'YouTube Audio').replace(' - Topic', '').trim(),
+            album: 'Recommended Radio',
+            albumArt: squareArt,
+            durationMs: (video.duration || 180) * 1000,
+            streamUrl: '',
+            type: 'song',
+            source_extension: 'youtube',
+            isOfficial: video.uploaderVerified || false,
+            apiIndex: i,
+            api_index: i
+          });
+        }
       }
       return JSON.stringify(recommendedTracks);
     } catch (e) {
