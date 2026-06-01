@@ -1,12 +1,15 @@
 /**
- * Musica Extension - YouTube Music InnerTube
- * Search directly targets official YouTube Music API nodes for 1:1 artwork and metadata.
+ * Musica Extension - YouTube Music
  */
 globalThis.youtube = {
   getSearchUrls: function(query) {
-    this._searchQuery = query || '';
+    var q = encodeURIComponent(query || '');
     return [
-      'https://music.youtube.com/youtubei/v1/search?q=' + encodeURIComponent(query || '')
+      'https://pipedapi.kavin.rocks/search?q=' + q + '&filter=music_songs',
+      'https://pipedapi.moomoo.me/search?q=' + q + '&filter=music_songs',
+      'https://piped-api.lunar.icu/search?q=' + q + '&filter=music_songs',
+      'https://pipedapi.syncit.xyz/search?q=' + q + '&filter=music_songs',
+      'https://api.piped.yt/search?q=' + q + '&filter=music_songs'
     ];
   },
 
@@ -16,137 +19,60 @@ globalThis.youtube = {
 
   processSearchResponse: function(body) {
     try {
-      var data = JSON.parse(body);
-      var tracks = [];
-      var items = [];
-
-      // Navigate down InnerTube tabbed search results hierarchy to find the music shelf contents
-      try {
-        var sections = data.contents.tabbedSearchResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents;
-        for (var s = 0; s < sections.length; s++) {
-          var section = sections[s];
-          if (section.musicShelfRenderer) {
-            items = section.musicShelfRenderer.contents || [];
-            break;
-          }
+      var items = JSON.parse(body);
+      if (!Array.isArray(items)) {
+        if (items.items && Array.isArray(items.items)) {
+          items = items.items;
+        } else {
+          return '[]';
         }
-      } catch (e) {
-        // Alternative response structure shape check
-        try {
-          items = data.contents.searchResultPageRenderer.content.sectionListRenderer.contents[0].musicShelfRenderer.contents || [];
-        } catch (err) {}
       }
-
+      
+      var tracks = [];
       for (var i = 0; i < Math.min(items.length, 20); i++) {
         var item = items[i];
-        if (!item || !item.musicResponsiveListItemRenderer) continue;
-        var renderer = item.musicResponsiveListItemRenderer;
-
-        // 1. Extract video ID
+        if (!item || !item.url) continue;
+        
         var videoId = '';
-        if (renderer.playlistItemData && renderer.playlistItemData.videoId) {
-          videoId = renderer.playlistItemData.videoId;
-        }
-        if (!videoId) {
-          try {
-            videoId = renderer.overlay.musicItemThumbnailOverlayRenderer.content.musicPlayButtonRenderer.playNavigationEndpoint.watchEndpoint.videoId;
-          } catch(e) {}
+        if (item.url.indexOf('v=') !== -1) {
+          videoId = item.url.split('v=')[1];
+        } else if (item.url.indexOf('/streams/') !== -1) {
+          videoId = item.url.split('/streams/')[1];
+        } else {
+          videoId = item.url.replace(/^\//, '');
         }
         if (!videoId) continue;
-
-        // 2. Extract title
-        var title = '';
-        try {
-          var runs = renderer.flexColumns[0].musicResponsiveListItemFlexColumnRenderer.text.runs;
-          if (runs && runs.length > 0) {
-            title = runs[0].text || '';
-          }
-        } catch (e) {}
-        if (!title) continue;
-
-        // 3. Extract Artist, Album and Duration from Flex column 1
-        var artist = 'Unknown Artist';
-        var album = 'Official Single';
-        var durationMs = 180000;
-        try {
-          var metaRuns = renderer.flexColumns[1].musicResponsiveListItemFlexColumnRenderer.text.runs;
-          if (metaRuns && metaRuns.length > 0) {
-            var textParts = [];
-            var currentPart = [];
-            for (var r = 0; r < metaRuns.length; r++) {
-              var text = metaRuns[r].text;
-              if (text === ' • ' || text === ' •') {
-                textParts.push(currentPart.join('').trim());
-                currentPart = [];
-              } else {
-                currentPart.push(text);
-              }
-            }
-            if (currentPart.length > 0) {
-              textParts.push(currentPart.join('').trim());
-            }
-
-            if (textParts.length >= 1) {
-              artist = textParts[0];
-            }
-            if (textParts.length >= 2) {
-              if (textParts[1].indexOf(':') !== -1) {
-                durationMs = this._parseDuration(textParts[1]) * 1000;
-              } else {
-                album = textParts[1];
-              }
-            }
-            if (textParts.length >= 3) {
-              if (textParts[2].indexOf(':') !== -1) {
-                durationMs = this._parseDuration(textParts[2]) * 1000;
-              }
-            }
-          }
-        } catch (e) {}
-
-        // 4. Extract pristine 1:1 studio artwork hosted on lh3.googleusercontent.com
-        var albumArt = '';
-        try {
-          var thumbnails = renderer.thumbnail.musicThumbnailRenderer.thumbnail.thumbnails;
-          if (thumbnails && thumbnails.length > 0) {
-            var rawArt = thumbnails[thumbnails.length - 1].url || '';
-            if (rawArt.indexOf('=w') !== -1) {
-              albumArt = rawArt.split('=w')[0] + '=w544-h544-l90-rj';
-            } else if (rawArt.indexOf('lh3.googleusercontent.com') !== -1) {
-              albumArt = rawArt + '=w544-h544-l90-rj';
-            } else {
-              albumArt = rawArt;
-            }
-          }
-        } catch (e) {}
-
-        if (!albumArt) {
-          albumArt = 'https://img.youtube.com/vi/' + videoId + '/maxresdefault.jpg';
+        
+        var title = item.title || 'Unknown Song';
+        var artist = item.uploaderName || item.uploader || 'Unknown Artist';
+        var durationMs = (item.duration || 180) * 1000;
+        
+        var albumArt = item.thumbnail || 'https://img.youtube.com/vi/' + videoId + '/maxresdefault.jpg';
+        if (albumArt.indexOf('=w') !== -1) {
+          albumArt = albumArt.split('=w')[0] + '=w544-h544-l90-rj';
+        } else if (albumArt.indexOf('lh3.googleusercontent.com') !== -1) {
+          albumArt = albumArt + '=w544-h544-l90-rj';
         }
-
-        // Clean up brackets, parentheses, Topic suffixes
+        
         var cleanTitle = title.replace(/(\s*-\s*Topic|\s*\[.*?\]|\s*\(.*?\))/gi, '').trim();
         var cleanArtist = artist.replace(/\s*-\s*Topic/gi, '').trim();
         
-        var isOfficialTrack = (artist || '').indexOf(' - Topic') !== -1;
-
         tracks.push({
           id: 'youtube_' + videoId,
           resourceId: videoId,
           title: cleanTitle,
           artist: cleanArtist,
-          album: album,
+          album: item.album || 'YouTube Single',
           albumArt: albumArt,
           durationMs: durationMs,
           streamUrl: '',
           type: 'song',
           source_extension: 'youtube',
-          isOfficial: isOfficialTrack,
+          isOfficial: item.uploaderVerified || false,
           apiIndex: i,
           api_index: i
         });
       }
-
       return JSON.stringify(tracks);
     } catch (e) {
       return '[]';
@@ -174,11 +100,9 @@ globalThis.youtube = {
       var data = JSON.parse(body);
       var recommendedTracks = [];
 
-      // 1. YouTube official InnerTube next format
       if (data.contents && data.contents.singleColumnWatchNextResults) {
         var items = [];
         
-        // Helper to recursively find tileRenderer nodes
         function findTiles(node) {
           if (!node) return;
           if (typeof node === 'object') {
@@ -235,7 +159,7 @@ globalThis.youtube = {
             artist: cleanArtist,
             album: 'Recommended Radio',
             albumArt: 'https://img.youtube.com/vi/' + videoId + '/maxresdefault.jpg',
-            durationMs: 200000, // typical track length placeholder
+            durationMs: 200000,
             streamUrl: '',
             type: 'song',
             source_extension: 'youtube',
@@ -244,9 +168,7 @@ globalThis.youtube = {
             api_index: i
           });
         }
-      } 
-      // 2. Fallback to Piped suggestions format
-      else {
+      } else {
         var suggestions = data.relatedStreams || [];
         for (var i = 0; i < Math.min(suggestions.length, 5); i++) {
           var video = suggestions[i];
@@ -285,8 +207,6 @@ globalThis.youtube = {
     }
   },
 
-  // getResolveUrls exposes Piped API endpoints for the video whose ID was set via setResolveContext.
-  // js_sandbox._resolveViaUrls tries each URL in order and calls processResolveResponse on the first 200.
   getResolveUrls: function(title, artist, durationSeconds) {
     var vid = this._pendingVideoId || '';
     if (!vid) return [];
@@ -298,7 +218,7 @@ globalThis.youtube = {
       'https://pipedapi.tokhmi.xyz/streams/' + vid,
       'https://pipedapi.adminforge.de/streams/' + vid,
       'https://api.piped.yt/streams/' + vid,
-      'https://pipedapi.reallyaweso.me/streams/' + vid,
+      'https://pipedapi.reallyaweso.me/streams/' + vid
     ];
   },
 
