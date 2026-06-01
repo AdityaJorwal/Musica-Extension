@@ -5,6 +5,8 @@ globalThis.youtube = {
   getSearchUrls: function(query) {
     var q = encodeURIComponent(query || '');
     return [
+      'https://api.piped.private.coffee/search?q=' + q + '&filter=music_songs',
+      'https://inv.thepixora.com/api/v1/search?q=' + q + '&type=video',
       'https://pipedapi.kavin.rocks/search?q=' + q + '&filter=music_songs',
       'https://pipedapi.moomoo.me/search?q=' + q + '&filter=music_songs',
       'https://piped-api.lunar.icu/search?q=' + q + '&filter=music_songs',
@@ -31,7 +33,23 @@ globalThis.youtube = {
       var tracks = [];
       for (var i = 0; i < Math.min(items.length, 20); i++) {
         var item = items[i];
-        if (!item || !item.url) continue;
+        if (!item) continue;
+        
+        // Normalize Invidious format to Piped format
+        if (item.videoId && !item.url) {
+          item.url = '/watch?v=' + item.videoId;
+        }
+        if (item.author && !item.uploaderName) {
+          item.uploaderName = item.author;
+        }
+        if (item.lengthSeconds && !item.duration) {
+          item.duration = item.lengthSeconds;
+        }
+        if (item.videoThumbnails && item.videoThumbnails.length > 0 && !item.thumbnail) {
+          item.thumbnail = item.videoThumbnails[0].url;
+        }
+        
+        if (!item.url) continue;
         
         var videoId = '';
         if (item.url.indexOf('v=') !== -1) {
@@ -211,6 +229,7 @@ globalThis.youtube = {
     var vid = this._pendingVideoId || '';
     if (!vid) return [];
     return [
+      'https://api.piped.private.coffee/streams/' + vid,
       'https://pipedapi.kavin.rocks/streams/' + vid,
       'https://pipedapi.moomoo.me/streams/' + vid,
       'https://piped-api.lunar.icu/streams/' + vid,

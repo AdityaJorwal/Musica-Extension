@@ -33,10 +33,12 @@
     "version": "0.32.0",
     "classification": "STREAMER",
     "script": "youtube.js",
-    "sha256": "12B0B6BAB95C0ECBFE3C981A4F4C35B49968483274B0DE302668426BCF64119C",
+    "sha256": "1786CA138B5B167CCC0F7BC980771B5154E2E9D47ACFC30C92E3CD3DF7D284DD",
     "capabilities": ["catalogSearch", "streamPlayback", "download", "recommendations"],
     "allowedHosts": [
       "youtube.com",
+      "private.coffee",
+      "thepixora.com",
       "pipedapi.kavin.rocks",
       "pipedapi.moomoo.me",
       "piped-api.lunar.icu",
