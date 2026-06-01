@@ -33,7 +33,7 @@
     "version": "0.32.0",
     "classification": "STREAMER",
     "script": "youtube.js",
-    "sha256": "1786CA138B5B167CCC0F7BC980771B5154E2E9D47ACFC30C92E3CD3DF7D284DD",
+    "sha256": "95C3ECEC8A5BAB200C1462FE3B9271D26F81A54770C4A8B6BF77EAA3D2AAFEC3",
     "capabilities": ["catalogSearch", "streamPlayback", "download", "recommendations"],
     "allowedHosts": [
       "youtube.com",

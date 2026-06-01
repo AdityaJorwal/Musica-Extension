@@ -65,7 +65,7 @@ globalThis.youtube = {
         var artist = item.uploaderName || item.uploader || 'Unknown Artist';
         var durationMs = (item.duration || 180) * 1000;
         
-        var albumArt = item.thumbnail || 'https://img.youtube.com/vi/' + videoId + '/maxresdefault.jpg';
+        var albumArt = item.thumbnail || 'https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg';
         if (albumArt.indexOf('=w') !== -1) {
           albumArt = albumArt.split('=w')[0] + '=w544-h544-l90-rj';
         } else if (albumArt.indexOf('lh3.googleusercontent.com') !== -1) {
@@ -176,7 +176,7 @@ globalThis.youtube = {
             title: cleanTitle,
             artist: cleanArtist,
             album: 'Recommended Radio',
-            albumArt: 'https://img.youtube.com/vi/' + videoId + '/maxresdefault.jpg',
+            albumArt: 'https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg',
             durationMs: 200000,
             streamUrl: '',
             type: 'song',
@@ -195,7 +195,7 @@ globalThis.youtube = {
           var extractedId = video.url.split('v=')[1] || '';
           if (!extractedId) continue;
 
-          var squareArt = video.thumbnail || 'https://img.youtube.com/vi/' + extractedId + '/maxresdefault.jpg';
+          var squareArt = video.thumbnail || 'https://img.youtube.com/vi/' + extractedId + '/hqdefault.jpg';
           if (squareArt.indexOf('=w') !== -1) {
             squareArt = squareArt.split('=w')[0] + '=w544-h544-l90-rj';
           } else if (squareArt.indexOf('lh3.googleusercontent.com') !== -1) {
