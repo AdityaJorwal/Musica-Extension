@@ -35,7 +35,18 @@
     "script": "youtube.js",
     "sha256": "12B0B6BAB95C0ECBFE3C981A4F4C35B49968483274B0DE302668426BCF64119C",
     "capabilities": ["catalogSearch", "streamPlayback", "download", "recommendations"],
-    "allowedHosts": ["youtube.com", "pipedapi.kavin.rocks", "invidious.io"],
+    "allowedHosts": [
+      "youtube.com",
+      "pipedapi.kavin.rocks",
+      "pipedapi.moomoo.me",
+      "piped-api.lunar.icu",
+      "pipedapi.syncit.xyz",
+      "pipedapi.tokhmi.xyz",
+      "pipedapi.adminforge.de",
+      "api.piped.yt",
+      "pipedapi.reallyaweso.me",
+      "invidious.io"
+    ],
     "permissions": []
   },
   {
