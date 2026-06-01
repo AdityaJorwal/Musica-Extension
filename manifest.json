@@ -7,7 +7,7 @@
     "version": "0.32.0",
     "classification": "METADATA",
     "script": "spotify.js",
-    "sha256": "207BD91D60425160E4D2305F2BC9FAD6DB938A40CD1B55F1042D014B64C189D3",
+    "sha256": "FAB7300BFBE4522DB6F7D31416D091F5139C3161DC8B81B70BEE7F3BDD014553",
     "capabilities": ["metadataLookup", "charts", "recommendations"],
     "allowedHosts": ["itunes.apple.com"],
     "permissions": []
@@ -33,7 +33,7 @@
     "version": "0.32.0",
     "classification": "STREAMER",
     "script": "youtube.js",
-    "sha256": "95C3ECEC8A5BAB200C1462FE3B9271D26F81A54770C4A8B6BF77EAA3D2AAFEC3",
+    "sha256": "F5CCB71D0EB83205A986E0F05B49DD954E92829C2FEEE633822C1E680C05D20C",
     "capabilities": ["catalogSearch", "streamPlayback", "download", "recommendations"],
     "allowedHosts": [
       "youtube.com",
