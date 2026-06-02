@@ -92,10 +92,12 @@ globalThis.jiosaavn = {
   },
 
   getResolveUrl: function(title, artist, duration) {
-    this._resolveTitle = title || '';
-    this._resolveArtist = artist || '';
+    var cleanTitle = (title || '').replace(/(\s*\[.*?\]|\s*\(.*?\))/gi, '').trim();
+    var cleanArtist = (artist || '').replace(/(\s*\[.*?\]|\s*\(.*?\))/gi, '').trim();
+    this._resolveTitle = cleanTitle;
+    this._resolveArtist = cleanArtist;
     this._resolveDuration = parseInt(duration || 0, 10);
-    var query = (title || '') + ' ' + (artist || '');
+    var query = cleanTitle + ' ' + cleanArtist;
     return 'https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&api_version=4&ctx=web6dot0&q=' +
       encodeURIComponent(query.trim());
   },
