@@ -291,14 +291,14 @@ globalThis.youtube = {
     var vid = this._pendingVideoId || '';
     if (!vid) return [];
     return [
-      'https://pipedapi.kavin.rocks/streams/' + vid,
+      'https://pipedapi.adminforge.de/streams/' + vid,
+      'https://api.piped.yt/streams/' + vid,
       'https://pipedapi.moomoo.me/streams/' + vid,
       'https://piped-api.lunar.icu/streams/' + vid,
       'https://pipedapi.syncit.xyz/streams/' + vid,
       'https://pipedapi.tokhmi.xyz/streams/' + vid,
-      'https://pipedapi.adminforge.de/streams/' + vid,
-      'https://api.piped.yt/streams/' + vid,
       'https://pipedapi.reallyaweso.me/streams/' + vid,
+      'https://pipedapi.kavin.rocks/streams/' + vid,
     ];
   },
 
