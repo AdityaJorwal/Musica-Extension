@@ -36,6 +36,78 @@
     "isActive": true
   },
   {
+    "id": "betterlyrics",
+    "name": "BetterLyrics Engine",
+    "description": "TTML synced lyrics matched by title, artist, and duration.",
+    "version": "0.32.0",
+    "classification": "LYRICS",
+    "script": "betterlyrics.js",
+    "isActive": true
+  },
+  {
+    "id": "unison",
+    "name": "Unison Lyrics",
+    "description": "Timed lyrics resolved by metadata or videoId.",
+    "version": "0.32.0",
+    "classification": "LYRICS",
+    "script": "unison.js",
+    "isActive": true
+  },
+  {
+    "id": "simpmusic",
+    "name": "SimpMusic Lyrics",
+    "description": "Synced lyrics by videoId matched to correct duration.",
+    "version": "0.32.0",
+    "classification": "LYRICS",
+    "script": "simpmusic.js",
+    "isActive": true
+  },
+  {
+    "id": "paxsenix_apple",
+    "name": "Paxsenix: Apple Music",
+    "description": "High-quality Apple Music lyrics (TTML/LRC) via Paxsenix API.",
+    "version": "0.32.0",
+    "classification": "LYRICS",
+    "script": "paxsenix_apple.js",
+    "isActive": true
+  },
+  {
+    "id": "paxsenix_spotify",
+    "name": "Paxsenix: Spotify",
+    "description": "Spotify synced lyrics via Paxsenix API.",
+    "version": "0.32.0",
+    "classification": "LYRICS",
+    "script": "paxsenix_spotify.js",
+    "isActive": true
+  },
+  {
+    "id": "paxsenix_netease",
+    "name": "Paxsenix: NetEase",
+    "description": "Chinese and global NetEase synced lyrics via Paxsenix API.",
+    "version": "0.32.0",
+    "classification": "LYRICS",
+    "script": "paxsenix_netease.js",
+    "isActive": true
+  },
+  {
+    "id": "paxsenix_musixmatch",
+    "name": "Paxsenix: Musixmatch",
+    "description": "Musixmatch plain and synced lyrics via Paxsenix API.",
+    "version": "0.32.0",
+    "classification": "LYRICS",
+    "script": "paxsenix_musixmatch.js",
+    "isActive": true
+  },
+  {
+    "id": "paxsenix_kugou",
+    "name": "Paxsenix: KuGou",
+    "description": "KuGou regional synced lyrics via Paxsenix API.",
+    "version": "0.32.0",
+    "classification": "LYRICS",
+    "script": "paxsenix_kugou.js",
+    "isActive": true
+  },
+  {
     "id": "gaana",
     "name": "Gaana Engine",
     "description": "Indian Bollywood metadata index (optional).",
