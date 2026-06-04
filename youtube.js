@@ -174,6 +174,35 @@ globalThis.youtube = {
       var data = JSON.parse(body);
       var recommendedTracks = [];
 
+      // Helper to recursively find duration simpleText from tileRenderer
+      function findDuration(obj) {
+        if (!obj) return null;
+        if (typeof obj === 'object') {
+          if (obj.thumbnailOverlayTimeStatusRenderer && obj.thumbnailOverlayTimeStatusRenderer.text) {
+            var txt = obj.thumbnailOverlayTimeStatusRenderer.text.simpleText || 
+                     (obj.thumbnailOverlayTimeStatusRenderer.text.runs && obj.thumbnailOverlayTimeStatusRenderer.text.runs[0] ? obj.thumbnailOverlayTimeStatusRenderer.text.runs[0].text : '');
+            if (txt) return txt;
+          }
+          if (obj.simpleText && typeof obj.simpleText === 'string') {
+            if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(obj.simpleText)) {
+              return obj.simpleText;
+            }
+          }
+          for (var key in obj) {
+            if (obj.hasOwnProperty(key)) {
+              var found = findDuration(obj[key]);
+              if (found) return found;
+            }
+          }
+        } else if (Array.isArray(obj)) {
+          for (var i = 0; i < obj.length; i++) {
+            var found = findDuration(obj[i]);
+            if (found) return found;
+          }
+        }
+        return null;
+      }
+
       // 1. YouTube official InnerTube next format
       if (data.contents && data.contents.singleColumnWatchNextResults) {
         var items = [];
@@ -228,6 +257,13 @@ globalThis.youtube = {
           var cleanTitle = title.replace(/(\s*-\s*Topic|\s*\[.*?\]|\s*\(.*?\))/gi, '').trim();
           var cleanArtist = artist.replace(/\s*-\s*Topic/gi, '').trim();
           
+          // Parse actual duration if available, fallback to typical 200s
+          var durStr = findDuration(tile);
+          var durationMs = 200000;
+          if (durStr) {
+            durationMs = this._parseDuration(durStr) * 1000;
+          }
+          
           recommendedTracks.push({
             id: 'youtube_' + videoId,
             resourceId: videoId,
@@ -235,7 +271,7 @@ globalThis.youtube = {
             artist: cleanArtist,
             album: 'Recommended Radio',
             albumArt: 'https://img.youtube.com/vi/' + videoId + '/maxresdefault.jpg',
-            durationMs: 200000, // typical track length placeholder
+            durationMs: durationMs,
             streamUrl: '',
             type: 'song',
             source_extension: 'youtube',
