@@ -39,7 +39,7 @@ globalThis.paxsenix_kugou = {
           }
         }
         
-        var id = best ? best.id : null;
+        var id = best ? (best.hash || best.id) : null;
         var bestDur = best ? (best.durationMs || best.duration || 0) : 0;
         var finalTDur = targetDuration;
         if (bestDur > 10000) bestDur = Math.round(bestDur / 1000);
@@ -47,14 +47,15 @@ globalThis.paxsenix_kugou = {
         var minDiffSec = Math.abs(bestDur - finalTDur);
         
         if (id && (targetDuration <= 0 || minDiffSec < 15)) {
-          return 'https://lyrics.paxsenix.org/kugou/lyrics?id=' + encodeURIComponent(id) + '&word=true';
+          return 'https://lyrics.paxsenix.org/kugou/lyrics?id=' + encodeURIComponent(id);
         }
         return '';
       }
       
       // Step 2: KuGou lyrics response
-      if (data && data.lyrics) {
-        return data.lyrics.trim();
+      if (data) {
+        if (data.lyric) return data.lyric.trim();
+        if (data.lyrics) return data.lyrics.trim();
       }
       
       return '';

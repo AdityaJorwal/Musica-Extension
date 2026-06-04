@@ -47,7 +47,7 @@ globalThis.paxsenix_netease = {
         var minDiffSec = Math.abs(bestDur - finalTDur);
         
         if (best && (targetDuration <= 0 || minDiffSec < 15)) {
-          return 'https://lyrics.paxsenix.org/netease/lyrics?id=' + encodeURIComponent(best.id) + '&word=true';
+          return 'https://lyrics.paxsenix.org/netease/lyrics?id=' + encodeURIComponent(best.id);
         }
         return '';
       }

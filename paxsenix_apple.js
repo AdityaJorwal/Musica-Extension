@@ -5,12 +5,21 @@
 globalThis.paxsenix_apple = {
   _durationMs: 0,
 
-  getSearchUrls: function(title, artist, durationMs) {
+  getSearchUrls: function(title, artist, durationMs, trackId) {
     this._durationMs = parseInt(durationMs || 0, 10);
     var cleanTitle = (title || '').replace(/(\s*-\s*Topic|\s*-\s*Single|\s*-\s*EP|\s*\[.*?\]|\s*\(.*?\))|\s*-\s*From.*/gi, '').trim();
     var cleanArtist = (artist || '').split(/,|\s*&\s*|\s*feat\.?\s*/i)[0].trim();
     
-    return ['https://lyrics.paxsenix.org/apple-music/search?q=' + encodeURIComponent(cleanTitle + ' ' + cleanArtist)];
+    var urls = [];
+    var aId = trackId || '';
+    if (aId.indexOf('apple_') === 0) {
+      aId = aId.substring(6);
+    }
+    if (aId && /^\d+$/.test(aId)) {
+      urls.push('https://lyrics.paxsenix.org/apple-music/lyrics?id=' + encodeURIComponent(aId) + '&ttml=true');
+    }
+    urls.push('https://lyrics.paxsenix.org/apple-music/search?q=' + encodeURIComponent(cleanTitle + ' ' + cleanArtist));
+    return urls;
   },
 
   processLyricsResponse: function(body) {
@@ -24,6 +33,14 @@ globalThis.paxsenix_apple = {
       }
       
       var data = JSON.parse(body);
+      
+      // If data parsed into a plain string (XML/TTML or LRC)
+      if (typeof data === 'string') {
+        var cleanData = data.trim();
+        if (cleanData.indexOf('<tt') === 0 || cleanData.indexOf('<?xml') === 0 || cleanData.indexOf('[') === 0) {
+          return cleanData;
+        }
+      }
       
       // Step 1: If search response (is array)
       if (Array.isArray(data)) {

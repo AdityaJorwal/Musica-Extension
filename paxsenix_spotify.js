@@ -5,12 +5,21 @@
 globalThis.paxsenix_spotify = {
   _durationMs: 0,
 
-  getSearchUrls: function(title, artist, durationMs) {
+  getSearchUrls: function(title, artist, durationMs, trackId) {
     this._durationMs = parseInt(durationMs || 0, 10);
     var cleanTitle = (title || '').replace(/(\s*-\s*Topic|\s*-\s*Single|\s*-\s*EP|\s*\[.*?\]|\s*\(.*?\))|\s*-\s*From.*/gi, '').trim();
     var cleanArtist = (artist || '').split(/,|\s*&\s*|\s*feat\.?\s*/i)[0].trim();
     
-    return ['https://lyrics.paxsenix.org/spotify/search?q=' + encodeURIComponent(cleanTitle + ' ' + cleanArtist)];
+    var urls = [];
+    var sId = trackId || '';
+    if (sId.indexOf('spotify_') === 0) {
+      sId = sId.substring(8);
+    }
+    if (sId && sId.length === 22 && /^[a-zA-Z0-9]+$/.test(sId)) {
+      urls.push('https://lyrics.paxsenix.org/spotify/lyrics?id=' + encodeURIComponent(sId));
+    }
+    urls.push('https://lyrics.paxsenix.org/spotify/search?q=' + encodeURIComponent(cleanTitle + ' ' + cleanArtist));
+    return urls;
   },
 
   processLyricsResponse: function(body) {
@@ -24,6 +33,14 @@ globalThis.paxsenix_spotify = {
       }
       
       var data = JSON.parse(body);
+      
+      // If data parsed into a plain string starting with '['
+      if (typeof data === 'string') {
+        var cleanData = data.trim();
+        if (cleanData.indexOf('[') === 0) {
+          return cleanData;
+        }
+      }
       
       // Helper to parse duration string (e.g. "03:53") or millisecond number to seconds
       function parseToSeconds(val) {
@@ -53,7 +70,7 @@ globalThis.paxsenix_spotify = {
           }
         }
         
-        var id = best ? (best.realId || best.id) : null;
+        var id = best ? (best.realId || best.id || best.trackId) : null;
         var bestDurSec = best ? parseToSeconds(best.durationMs || best.duration || 0) : 0;
         var minDiffSec = Math.abs(bestDurSec - targetDurationSec);
         
