@@ -27,8 +27,8 @@ globalThis.paxsenix_spotify = {
       if (!body) return '';
       var trimmed = body.trim();
       
-      // If it is already a raw LRC string returned from the API
-      if (trimmed.indexOf('[') === 0) {
+      // If it is already a raw LRC string returned from the API (and not a JSON search array)
+      if (trimmed.indexOf('[') === 0 && !/^\[\s*\{/.test(trimmed)) {
         return trimmed;
       }
       
