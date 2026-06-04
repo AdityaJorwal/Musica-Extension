@@ -34,14 +34,24 @@ globalThis.paxsenix_apple = {
         
         for (var i = 0; i < data.length; i++) {
           var item = data[i];
-          var diff = Math.abs((item.duration || 0) - targetDuration);
+          var itemDur = item.duration || 0;
+          var tDur = targetDuration;
+          if (itemDur > 10000) itemDur = Math.round(itemDur / 1000);
+          if (tDur > 10000) tDur = Math.round(tDur / 1000);
+          var diff = Math.abs(itemDur - tDur);
           if (diff < minDiff) {
             minDiff = diff;
             best = item;
           }
         }
         
-        if (best && (targetDuration <= 0 || minDiff < 15000)) {
+        var bestDur = best ? (best.duration || 0) : 0;
+        var finalTDur = targetDuration;
+        if (bestDur > 10000) bestDur = Math.round(bestDur / 1000);
+        if (finalTDur > 10000) finalTDur = Math.round(finalTDur / 1000);
+        var minDiffSec = Math.abs(bestDur - finalTDur);
+        
+        if (best && (targetDuration <= 0 || minDiffSec < 15)) {
           return 'https://lyrics.paxsenix.org/apple-music/lyrics?id=' + encodeURIComponent(best.id) + '&ttml=true';
         }
         return '';

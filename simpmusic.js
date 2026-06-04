@@ -10,9 +10,14 @@ globalThis.simpmusic = {
     
     var urls = [];
     
-    // SimpMusic strictly requires a YouTube video ID
-    if (trackId && trackId.length === 11 && !/[\\/\.\s]/.test(trackId)) {
-      urls.push('https://api-lyrics.simpmusic.org/v1/' + encodeURIComponent(trackId));
+    // SimpMusic strictly requires a YouTube video ID. Strip 'youtube_' prefix if present.
+    var yId = trackId || '';
+    if (yId.indexOf('youtube_') === 0) {
+      yId = yId.substring(8);
+    }
+    
+    if (yId && yId.length === 11 && !/[\\/\.\s]/.test(yId)) {
+      urls.push('https://api-lyrics.simpmusic.org/v1/' + encodeURIComponent(yId));
     }
     
     return urls;

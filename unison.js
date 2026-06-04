@@ -11,9 +11,14 @@ globalThis.unison = {
     
     var urls = [];
     
-    // Check if trackId is a YouTube video ID (11 characters)
-    if (trackId && trackId.length === 11 && !/[\\/\.\s]/.test(trackId)) {
-      urls.push('https://unison.boidu.dev/lyrics?v=' + encodeURIComponent(trackId));
+    // Check if trackId is a YouTube video ID (11 characters). Strip 'youtube_' prefix if present.
+    var yId = trackId || '';
+    if (yId.indexOf('youtube_') === 0) {
+      yId = yId.substring(8);
+    }
+    
+    if (yId && yId.length === 11 && !/[\\/\.\s]/.test(yId)) {
+      urls.push('https://unison.boidu.dev/lyrics?v=' + encodeURIComponent(yId));
     }
     
     // Fallback: Metadata-based URL
