@@ -19,9 +19,9 @@ globalThis.lrclib = {
     
     // URL 1: Strict get query if duration is valid
     if (durationSec > 0) {
-      urls.push('https://lrclib.net/api/get?artist=' +
+      urls.push('https://lrclib.net/api/get?artist_name=' +
         encodeURIComponent(cleanArtist) +
-        '&track=' + encodeURIComponent(cleanTitle) +
+        '&track_name=' + encodeURIComponent(cleanTitle) +
         '&duration=' + durationSec);
     }
     
