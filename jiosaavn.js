@@ -171,6 +171,15 @@ globalThis.jiosaavn = {
       else if (delta <= 10) score += 8;
       else if (delta > 45) score -= 12;
     }
+
+    var versionKeywords = ['female', 'male', 'remix', 'lofi', 'lullaby', 'cover', 'acoustic', 'instrumental', 'karaoke', 'slowed', 'reverb', 'sad version', 'reprise', 'unplugged', 'sped up'];
+    for (var k = 0; k < versionKeywords.length; k++) {
+      var kw = versionKeywords[k];
+      if (title.indexOf(kw) !== -1 && targetTitle.indexOf(kw) === -1) {
+        score -= 60;
+      }
+    }
+
     return score;
   },
 
