@@ -18,7 +18,8 @@ globalThis.paxsenix_apple = {
     if (aId && /^\d+$/.test(aId)) {
       urls.push('https://lyrics.paxsenix.org/apple-music/lyrics?id=' + encodeURIComponent(aId) + '&ttml=true');
     }
-    urls.push('https://lyrics.paxsenix.org/apple-music/search?q=' + encodeURIComponent(cleanTitle + ' ' + cleanArtist));
+    // Use iTunes Search API as the Apple Music search replacement
+    urls.push('https://itunes.apple.com/search?term=' + encodeURIComponent(cleanTitle + ' ' + cleanArtist) + '&entity=song&limit=5');
     return urls;
   },
 
@@ -42,7 +43,30 @@ globalThis.paxsenix_apple = {
         }
       }
       
-      // Step 1: If search response (is array)
+      // Step 1a: iTunes search response
+      if (data && Array.isArray(data.results)) {
+        if (data.results.length === 0) return '';
+        var best = null;
+        var minDiff = Infinity;
+        var targetDuration = this._durationMs;
+        
+        for (var i = 0; i < data.results.length; i++) {
+          var item = data.results[i];
+          var itemDur = item.trackTimeMillis || 0;
+          var diff = Math.abs(itemDur - targetDuration);
+          if (diff < minDiff) {
+            minDiff = diff;
+            best = item;
+          }
+        }
+        
+        if (best && (targetDuration <= 0 || minDiff < 25000)) { // 25 seconds tolerance
+          return 'https://lyrics.paxsenix.org/apple-music/lyrics?id=' + encodeURIComponent(best.trackId) + '&ttml=true';
+        }
+        return '';
+      }
+      
+      // Step 1b: If search response (legacy array fallback)
       if (Array.isArray(data)) {
         if (data.length === 0) return '';
         var best = null;
@@ -68,7 +92,7 @@ globalThis.paxsenix_apple = {
         if (finalTDur > 10000) finalTDur = Math.round(finalTDur / 1000);
         var minDiffSec = Math.abs(bestDur - finalTDur);
         
-        if (best && (targetDuration <= 0 || minDiffSec < 15)) {
+        if (best && (targetDuration <= 0 || minDiffSec < 25)) {
           return 'https://lyrics.paxsenix.org/apple-music/lyrics?id=' + encodeURIComponent(best.id) + '&ttml=true';
         }
         return '';

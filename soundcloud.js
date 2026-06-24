@@ -10,7 +10,7 @@ globalThis.soundcloud = {
    */
   getSearchUrl: function(query) {
     return 'https://api-v2.soundcloud.com/search/tracks?q=' +
-      encodeURIComponent(query) + '&client_id=IRnK0myxxLJdwXXjybXQo71mXyDGpaM6&limit=10';
+      encodeURIComponent(query) + '&client_id=QNR5nrdLOvApYERC8AOUr3VjRfHnLjle&limit=10';
   },
 
   /**
@@ -28,12 +28,13 @@ globalThis.soundcloud = {
 
         tracks.push({
           id: 'soundcloud_' + (track.id || i),
+          resourceId: (track.id || '').toString(),
           title: track.title,
           artist: (track.user && track.user.username) ? track.user.username : 'Unknown Artist',
           album: 'SoundCloud Track',
           albumArt: track.artwork_url || (track.user ? track.user.avatar_url : ''),
           durationMs: track.duration || 180000,
-          streamUrl: 'https://api.soundcloud.com/tracks/' + track.id + '/stream?client_id=IRnK0myxxLJdwXXjybXQo71mXyDGpaM6',
+          streamUrl: '', // Will resolve dynamically using getTrackResolveUrls
           source_extension: 'soundcloud'
         });
       }
@@ -41,6 +42,12 @@ globalThis.soundcloud = {
     } catch (e) {
       return '[]';
     }
+  },
+
+  getTrackResolveUrls: function(trackId) {
+    return [
+      'https://api-v2.soundcloud.com/tracks/' + trackId + '?client_id=QNR5nrdLOvApYERC8AOUr3VjRfHnLjle'
+    ];
   },
 
   /**
@@ -53,12 +60,27 @@ globalThis.soundcloud = {
     this._resolveDurationMs = parseInt(duration || 0, 10) * 1000;
     var query = (title || '') + ' ' + (artist || '');
     return 'https://api-v2.soundcloud.com/search/tracks?q=' +
-      encodeURIComponent(query.trim()) + '&client_id=IRnK0myxxLJdwXXjybXQo71mXyDGpaM6&limit=3';
+      encodeURIComponent(query.trim()) + '&client_id=QNR5nrdLOvApYERC8AOUr3VjRfHnLjle&limit=3';
   },
 
   processResolveResponse: function(body) {
     try {
       var data = JSON.parse(body);
+      
+      // Case A: Track details response (resolved from getTrackResolveUrls)
+      if (data && data.media && data.media.transcodings) {
+        var trans = data.media.transcodings;
+        for (var j = 0; j < trans.length; j++) {
+          if (trans[j].preset.indexOf('progressive') !== -1) {
+            return trans[j].url + '?client_id=QNR5nrdLOvApYERC8AOUr3VjRfHnLjle';
+          }
+        }
+        if (trans.length > 0) {
+          return trans[0].url + '?client_id=QNR5nrdLOvApYERC8AOUr3VjRfHnLjle';
+        }
+      }
+      
+      // Case B: Search response (resolved from getResolveUrl)
       if (data && data.collection && data.collection.length > 0) {
         var track = null;
         var bestScore = -1;
@@ -70,14 +92,22 @@ globalThis.soundcloud = {
             track = candidate;
           }
         }
-        if (track && track.id) {
-          return 'https://api.soundcloud.com/tracks/' + track.id +
-            '/stream?client_id=IRnK0myxxLJdwXXjybXQo71mXyDGpaM6';
+        if (track && track.media && track.media.transcodings) {
+          var trans = track.media.transcodings;
+          for (var k = 0; k < trans.length; k++) {
+            if (trans[k].preset.indexOf('progressive') !== -1) {
+              return trans[k].url + '?client_id=QNR5nrdLOvApYERC8AOUr3VjRfHnLjle';
+            }
+          }
+          if (trans.length > 0) {
+            return trans[0].url + '?client_id=QNR5nrdLOvApYERC8AOUr3VjRfHnLjle';
+          }
         }
       }
     } catch (e) {}
     return '';
   },
+
 
   _scoreCandidate: function(track) {
     var targetTitle = this._normalise(this._resolveTitle);

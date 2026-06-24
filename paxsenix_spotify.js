@@ -74,7 +74,7 @@ globalThis.paxsenix_spotify = {
         var bestDurSec = best ? parseToSeconds(best.durationMs || best.duration || 0) : 0;
         var minDiffSec = Math.abs(bestDurSec - targetDurationSec);
         
-        if (id && (this._durationMs <= 0 || minDiffSec < 15)) {
+        if (id && (this._durationMs <= 0 || minDiffSec < 25)) {
           return 'https://lyrics.paxsenix.org/spotify/lyrics?id=' + encodeURIComponent(id);
         }
         return '';
